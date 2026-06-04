@@ -1,7 +1,7 @@
 # SafeSchool — MAP.md
 
 ## Current Phase
-> Phase 1 — Foundation & DevOps Setup
+> Phase 1 — Foundation & DevOps Setup complete
 
 ## Completed
 - [x] Monorepo folders scaffolded
@@ -13,9 +13,10 @@
 - [x] Mobile ESLint and TypeScript checks configured
 - [x] GitHub Actions CI configured
 - [x] Phase 1 setup documented
+- [x] Phase 1 final verification
 
 ## In Progress
-- [ ] Phase 1 final verification
+- [ ] Phase 2 — Auth, Users & Core API
 
 ## Up Next
 - [ ] Clerk auth foundation
