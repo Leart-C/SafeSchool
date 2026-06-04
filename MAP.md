@@ -5,6 +5,7 @@
 
 ## Completed
 - [x] Monorepo folders scaffolded
+- [x] Docker Compose foundation added: nginx, php-fpm, MySQL, Redis, Mailpit
 
 ## In Progress
 - [ ] Docker Compose setup
