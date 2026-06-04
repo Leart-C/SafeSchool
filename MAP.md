@@ -11,12 +11,12 @@
 - [x] React + Vite frontend installed
 - [x] Expo mobile app bootstrapped
 - [x] Mobile ESLint and TypeScript checks configured
+- [x] GitHub Actions CI configured
 
 ## In Progress
-- [ ] GitHub Actions CI
+- [ ] Clerk auth foundation
 
 ## Up Next
-- [ ] Clerk auth foundation
 
 ## Decisions Log
 | Date | Decision | Reason |
