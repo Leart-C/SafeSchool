@@ -12,11 +12,13 @@
 - [x] Expo mobile app bootstrapped
 - [x] Mobile ESLint and TypeScript checks configured
 - [x] GitHub Actions CI configured
+- [x] Phase 1 setup documented
 
 ## In Progress
-- [ ] Clerk auth foundation
+- [ ] Phase 1 final verification
 
 ## Up Next
+- [ ] Clerk auth foundation
 
 ## Decisions Log
 | Date | Decision | Reason |
