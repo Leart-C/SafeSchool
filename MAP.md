@@ -8,10 +8,11 @@
 - [x] Docker Compose foundation added: nginx, php-fpm, MySQL, Redis, Mailpit
 - [x] Laravel backend installed and upgraded to Laravel 12
 - [x] Laravel migrations and starter tests verified
+- [x] React + Vite frontend installed
+- [x] Expo mobile app bootstrapped
+- [x] Mobile ESLint and TypeScript checks configured
 
 ## In Progress
-- [ ] React + Vite frontend install
-- [ ] Expo mobile bootstrap
 - [ ] GitHub Actions CI
 
 ## Up Next
