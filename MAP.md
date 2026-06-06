@@ -19,14 +19,18 @@
 - [x] Spatie roles and permissions installed
 - [x] Base roles seeded: admin, teacher, parent, student
 - [x] Roles and permissions foundation verified
+- [x] School model created
+- [x] Users scoped to schools with nullable school_id
+- [x] Demo school seeded for local development
 
 ## In Progress
-- [ ] School model and user school scoping
+- [ ] Clerk webhook user sync
 
 ## Up Next
-- [ ] School model and user school scoping
 - [ ] Clerk webhook user sync
 - [ ] Clerk JWT middleware for protected API routes
+- [ ] Parent/student relationship model
+- [ ] Teacher/class relationship model
 - [ ] Base API controller and response format
 
 ## Decisions Log
