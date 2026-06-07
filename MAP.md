@@ -26,12 +26,12 @@
 - [x] Clerk webhook signature verification added
 - [x] Clerk JWT middleware for protected API routes
 - [x] Protected /api/me endpoint added
+- [x] Base API controller and response format
 
 ## In Progress
-- [ ] Base API controller and response format
+- [ ] Parent/student relationship model
 
 ## Up Next
-- [ ] Base API controller and response format
 - [ ] Parent/student relationship model
 - [ ] Teacher/class relationship model
 
@@ -44,3 +44,4 @@
 | 2026-06-06 | Spatie Permission for authorization roles | Battle-tested Laravel role/permission package with policy-friendly integration |
 | 2026-06-07 | Svix verification for Clerk webhooks | Public webhook endpoints must verify signed raw payloads before syncing users |
 | 2026-06-07 | /api/me as first protected route | Frontend and mobile need a single SafeSchool profile endpoint after Clerk login |
+| 2026-06-07 | Standard API response envelope | API consumers should receive predictable data/message and error/errors shapes |

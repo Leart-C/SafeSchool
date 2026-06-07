@@ -86,16 +86,19 @@ class ClerkJwtMiddlewareTest extends TestCase
             ->getJson('/api/me')
             ->assertOk()
             ->assertJson([
-                'id' => $user->id,
-                'clerk_user_id' => 'user_123',
-                'name' => 'Ada Lovelace',
-                'email' => 'ada@example.com',
-                'roles' => ['teacher'],
-                'school' => [
-                    'id' => $school->id,
-                    'name' => 'SafeSchool Demo',
-                    'slug' => 'safe-school-demo',
+                'data' => [
+                    'id' => $user->id,
+                    'clerk_user_id' => 'user_123',
+                    'name' => 'Ada Lovelace',
+                    'email' => 'ada@example.com',
+                    'roles' => ['teacher'],
+                    'school' => [
+                        'id' => $school->id,
+                        'name' => 'SafeSchool Demo',
+                        'slug' => 'safe-school-demo',
+                    ],
                 ],
+                'message' => 'Authenticated user retrieved.',
             ]);
     }
 
