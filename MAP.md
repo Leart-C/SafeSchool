@@ -22,13 +22,13 @@
 - [x] School model created
 - [x] Users scoped to schools with nullable school_id
 - [x] Demo school seeded for local development
+- [x] Clerk webhook user sync
+- [x] Clerk webhook signature verification added
 
 ## In Progress
-- [ ] Clerk webhook user sync
+- [ ] Clerk JWT middleware for protected API routes
 
 ## Up Next
-- [ ] Clerk webhook user sync
-- [ ] Clerk JWT middleware for protected API routes
 - [ ] Parent/student relationship model
 - [ ] Teacher/class relationship model
 - [ ] Base API controller and response format
@@ -40,3 +40,4 @@
 | 2026-06-04 | Laravel 12 over Laravel 11 | Laravel 11 is past security support; Composer blocks affected versions |
 | 2026-06-06 | Clerk for authentication, Laravel for user domain data | Clerk owns identity; SafeSchool owns roles, school scope, and app-specific relationships |
 | 2026-06-06 | Spatie Permission for authorization roles | Battle-tested Laravel role/permission package with policy-friendly integration |
+| 2026-06-07 | Svix verification for Clerk webhooks | Public webhook endpoints must verify signed raw payloads before syncing users |
