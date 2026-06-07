@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Services\Clerk\SyncClerkUserService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Svix\Exception\WebhookVerificationException;
+use Svix\Webhook;
 use Symfony\Component\HttpFoundation\Response;
 
 class ClerkWebhookController extends Controller
@@ -20,16 +22,23 @@ class ClerkWebhookController extends Controller
             ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
 
-        // Temporary simple shared-secret check.
-        // We will replace this with Clerk/Svix signature verification once real webhook values are available.
-        if ($request->header('X-SafeSchool-Clerk-Webhook-Secret') !== $webhookSecret) {
+        try {
+            $webhook = new Webhook($webhookSecret);
+
+            $event = $webhook->verify(
+                $request->getContent(),
+                collect($request->headers->all())
+                    ->map(fn (array $values): string => $values[0])
+                    ->all()
+            );
+        } catch (WebhookVerificationException) {
             return response()->json([
                 'message' => 'Invalid webhook signature.',
             ], Response::HTTP_UNAUTHORIZED);
         }
 
-        $eventType = $request->string('type')->toString();
-        $data = $request->array('data');
+        $eventType = $event['type'] ?? null;
+        $data = $event['data'] ?? [];
 
         if (in_array($eventType, ['user.created', 'user.updated'], true)) {
             $syncClerkUser->sync($data);
