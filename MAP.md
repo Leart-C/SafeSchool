@@ -24,14 +24,16 @@
 - [x] Demo school seeded for local development
 - [x] Clerk webhook user sync
 - [x] Clerk webhook signature verification added
+- [x] Clerk JWT middleware for protected API routes
+- [x] Protected /api/me endpoint added
 
 ## In Progress
-- [ ] Clerk JWT middleware for protected API routes
+- [ ] Base API controller and response format
 
 ## Up Next
+- [ ] Base API controller and response format
 - [ ] Parent/student relationship model
 - [ ] Teacher/class relationship model
-- [ ] Base API controller and response format
 
 ## Decisions Log
 | Date | Decision | Reason |
@@ -41,3 +43,4 @@
 | 2026-06-06 | Clerk for authentication, Laravel for user domain data | Clerk owns identity; SafeSchool owns roles, school scope, and app-specific relationships |
 | 2026-06-06 | Spatie Permission for authorization roles | Battle-tested Laravel role/permission package with policy-friendly integration |
 | 2026-06-07 | Svix verification for Clerk webhooks | Public webhook endpoints must verify signed raw payloads before syncing users |
+| 2026-06-07 | /api/me as first protected route | Frontend and mobile need a single SafeSchool profile endpoint after Clerk login |
