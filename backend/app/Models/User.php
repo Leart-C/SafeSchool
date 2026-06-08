@@ -8,6 +8,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Spatie\Permission\Traits\HasRoles;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class User extends Authenticatable
 {
@@ -55,5 +56,19 @@ class User extends Authenticatable
     public function school(): BelongsTo
     {
         return $this->belongsTo(School::class);
+    }
+
+    public function students(): BelongsToMany
+    {
+        return $this->belongsToMany(User::class, 'guardian_student', 'guardian_user_id', 'student_user_id')
+            ->withPivot(['relationship', 'is_primary', 'emergency_contact_priority'])
+            ->withTimestamps();
+    }
+
+    public function guardians(): BelongsToMany
+    {
+        return $this->belongsToMany(User::class, 'guardian_student', 'student_user_id', 'guardian_user_id')
+            ->withPivot(['relationship', 'is_primary', 'emergency_contact_priority'])
+            ->withTimestamps();
     }
 }
