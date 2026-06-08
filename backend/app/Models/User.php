@@ -4,11 +4,11 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Spatie\Permission\Traits\HasRoles;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class User extends Authenticatable
 {
@@ -70,5 +70,27 @@ class User extends Authenticatable
         return $this->belongsToMany(User::class, 'guardian_student', 'student_user_id', 'guardian_user_id')
             ->withPivot(['relationship', 'is_primary', 'emergency_contact_priority'])
             ->withTimestamps();
+    }
+
+    public function classes(): BelongsToMany
+    {
+        return $this->belongsToMany(SchoolClass::class, 'class_user')
+            ->withPivot(['role'])
+            ->withTimestamps();
+    }
+
+    public function teachingClasses(): BelongsToMany
+    {
+        return $this->classes()->wherePivot('role', 'teacher');
+    }
+
+    public function enrolledClasses(): BelongsToMany
+    {
+        return $this->classes()->wherePivot('role', 'student');
+    }
+
+    public function assistingClasses(): BelongsToMany
+    {
+        return $this->classes()->wherePivot('role', 'assistant');
     }
 }
