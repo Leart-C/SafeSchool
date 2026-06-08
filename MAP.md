@@ -31,12 +31,12 @@
 - [x] Guardian/student linking service with school-scope validation
 - [x] Teacher/class relationship model
 - [x] Class assignment service with school-scope validation
+- [x] Phase 2 backend foundation review
 
 ## In Progress
-- [ ] Phase 2 backend foundation review
+- [ ] Frontend Clerk integration
 
 ## Up Next
-- [ ] Phase 2 backend foundation review
 - [ ] Frontend Clerk integration
 - [ ] Mobile Clerk integration
 
@@ -52,3 +52,4 @@
 | 2026-06-07 | Standard API response envelope | API consumers should receive predictable data/message and error/errors shapes |
 | 2026-06-08 | Guardian/student pivot over parent_id | Real families can have multiple guardians and students; relationship metadata belongs on the link |
 | 2026-06-08 | SchoolClass model over Class | `class` is a PHP keyword; school class membership needs role metadata and school scoping |
+| 2026-06-08 | In-memory SQLite for backend tests | Feature tests should be fast and isolated from the local MySQL development database |
