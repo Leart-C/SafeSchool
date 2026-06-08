@@ -1,121 +1,70 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
+import {
+  SignedIn,
+  SignedOut,
+  SignInButton,
+  UserButton,
+  useAuth,
+} from '@clerk/clerk-react'
+import { useEffect, useState } from 'react'
+import { getMe, type MeResponse } from './services/meService'
 import './App.css'
 
 function App() {
-  const [count, setCount] = useState(0)
+  const { getToken, isLoaded, isSignedIn } = useAuth()
+  const [me, setMe] = useState<MeResponse | null>(null)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    async function loadMe() {
+      if (!isLoaded || !isSignedIn) {
+        return
+      }
+
+      try {
+        const token = await getToken()
+        if (!token) {
+          return
+        }
+
+        setError(null)
+        setMe(await getMe(token))
+      } catch (error) {
+        setError(error instanceof Error ? error.message : 'Failed to load profile')
+      }
+    }
+
+    void loadMe()
+  }, [getToken, isLoaded, isSignedIn])
 
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.tsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
+    <main>
+      <header>
+        <h1>SafeSchool</h1>
+        <SignedIn>
+          <UserButton />
+        </SignedIn>
+      </header>
 
-      <div className="ticks"></div>
+      <SignedOut>
+        <SignInButton mode="modal">
+          <button type="button">Sign in</button>
+        </SignInButton>
+      </SignedOut>
 
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
-
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
+      <SignedIn>
+        {error && <p>{error}</p>}
+        {me && !error ? (
+          <section>
+            <h2>{me.data.name}</h2>
+            <p>{me.data.email}</p>
+            <p>{me.data.roles.join(', ') || 'No role assigned'}</p>
+            <p>{me.data.school?.name ?? 'No school assigned'}</p>
+          </section>
+        ) : !error ? (
+          <p>Loading profile...</p>
+        ) : null}
+      </SignedIn>
+    </main>
   )
 }
 

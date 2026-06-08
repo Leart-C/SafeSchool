@@ -32,6 +32,7 @@
 - [x] Teacher/class relationship model
 - [x] Class assignment service with school-scope validation
 - [x] Phase 2 backend foundation review
+- [x] Frontend /api/me error messages surfaced from backend
 
 ## In Progress
 - [ ] Frontend Clerk integration
