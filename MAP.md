@@ -29,12 +29,16 @@
 - [x] Base API controller and response format
 - [x] Parent/student relationship model
 - [x] Guardian/student linking service with school-scope validation
+- [x] Teacher/class relationship model
+- [x] Class assignment service with school-scope validation
 
 ## In Progress
-- [ ] Teacher/class relationship model
+- [ ] Phase 2 backend foundation review
 
 ## Up Next
-- [ ] Teacher/class relationship model
+- [ ] Phase 2 backend foundation review
+- [ ] Frontend Clerk integration
+- [ ] Mobile Clerk integration
 
 ## Decisions Log
 | Date | Decision | Reason |
@@ -47,3 +51,4 @@
 | 2026-06-07 | /api/me as first protected route | Frontend and mobile need a single SafeSchool profile endpoint after Clerk login |
 | 2026-06-07 | Standard API response envelope | API consumers should receive predictable data/message and error/errors shapes |
 | 2026-06-08 | Guardian/student pivot over parent_id | Real families can have multiple guardians and students; relationship metadata belongs on the link |
+| 2026-06-08 | SchoolClass model over Class | `class` is a PHP keyword; school class membership needs role metadata and school scoping |
