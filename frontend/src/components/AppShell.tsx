@@ -1,4 +1,5 @@
 import { UserButton } from '@clerk/clerk-react'
+import { NavLink } from 'react-router-dom'
 import type { ReactNode } from 'react'
 import { Badge } from './ui/Badge'
 
@@ -15,11 +16,11 @@ type AppShellProps = {
 }
 
 const navigationItems = [
-  'Dashboard',
-  'Classes',
-  'Students',
-  'Attendance',
-  'Messages',
+  { label: 'Dashboard', to: '/app/dashboard' },
+  { label: 'Classes', to: '/app/classes' },
+  { label: 'Students', to: '/app/students' },
+  { label: 'Attendance', to: '/app/attendance' },
+  { label: 'Messages', to: '/app/messages' },
 ]
 
 export function AppShell({ user, children }: AppShellProps) {
@@ -43,18 +44,19 @@ export function AppShell({ user, children }: AppShellProps) {
 
         <nav className="mt-8 flex gap-1 overflow-x-auto lg:flex-col" aria-label="Main navigation">
           {navigationItems.map((item) => (
-            <a
-              aria-current={item === 'Dashboard' ? 'page' : undefined}
-              className={`rounded-lg px-3 py-2 text-sm font-medium ${
-                item === 'Dashboard'
-                  ? 'bg-slate-950 text-white'
-                  : 'text-slate-600 hover:bg-slate-100 hover:text-slate-950'
-              }`}
-              href={`#${item.toLowerCase()}`}
-              key={item}
+            <NavLink
+              className={({ isActive }) =>
+                `rounded-lg px-3 py-2 text-sm font-medium transition ${
+                  isActive
+                    ? 'bg-slate-950 text-white'
+                    : 'text-slate-600 hover:bg-slate-100 hover:text-slate-950'
+                }`
+              }
+              key={item.to}
+              to={item.to}
             >
-              {item}
-            </a>
+              {item.label}
+            </NavLink>
           ))}
         </nav>
       </aside>
@@ -71,9 +73,11 @@ export function AppShell({ user, children }: AppShellProps) {
           </div>
 
           <div className="flex items-center gap-3">
-            {user.roles.map((role) => (
-              <Badge key={role}>{role}</Badge>
-            ))}
+            {user.roles.length > 0 ? (
+              user.roles.map((role) => <Badge key={role}>{role}</Badge>)
+            ) : (
+              <Badge>No role</Badge>
+            )}
             <UserButton />
           </div>
         </header>
