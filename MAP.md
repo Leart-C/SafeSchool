@@ -62,13 +62,20 @@
 - [x] Frontend students service connected to API
 - [x] Frontend students table renders school-scoped data
 - [x] Demo student seeder added for local development
+- [x] Backend student profile endpoint added
+- [x] Backend student profile tests added
+- [x] Student controllers refactored to thin service-backed actions
+- [x] Frontend student profile route added
+- [x] Frontend student profile split into focused components
+- [x] Frontend students list split into header and table components
 
 ## In Progress
-- [ ] Frontend student profile foundation
+- [ ] Student profile foundation verification
 
 ## Up Next
 - [ ] Frontend students screen foundation
-- [ ] Frontend student profile foundation
+- [ ] Student profile foundation verification
+- [ ] Attendance screen foundation
 - [ ] Mobile Android dev-client verification
 
 ## Decisions Log

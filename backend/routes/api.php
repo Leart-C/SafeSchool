@@ -15,4 +15,5 @@ Route::middleware('clerk.auth')->group(function (): void {
     Route::put('/classes/{class}', [ClassController::class, 'update']);
 
     Route::get('/students', [StudentController::class, 'index']);
+    Route::get('/students/{student}', [StudentController::class, 'show']);
 });

@@ -13,6 +13,7 @@ import { AttendancePage } from '../features/attendance/AttendancePage'
 import { ClassesPage } from '../features/classes/ClassesPage'
 import { MessagesPage } from '../features/messages/MessagesPage'
 import { StudentsPage } from '../features/students/StudentsPage'
+import { StudentProfilePage } from '../features/students/StudentProfilePage'
 import { AuthenticatedLayout } from '../layouts/AuthenticatedLayout'
 
 export function AppRouter() {
@@ -45,6 +46,7 @@ export function AppRouter() {
         <Route path="dashboard" element={<DashboardHome />} />
         <Route path="classes" element={<ClassesPage />} />
         <Route path="students" element={<StudentsPage />} />
+        <Route path="students/:studentId" element={<StudentProfilePage />} />
         <Route path="attendance" element={<AttendancePage />} />
         <Route path="messages" element={<MessagesPage />} />
       </Route>
