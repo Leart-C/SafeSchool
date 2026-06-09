@@ -68,13 +68,14 @@
 - [x] Frontend student profile route added
 - [x] Frontend student profile split into focused components
 - [x] Frontend students list split into header and table components
+- [x] Class API controller refactored to service-backed actions
+- [x] Clerk webhook controller refactored to service-backed processing
 
 ## In Progress
-- [ ] Student profile foundation verification
+- [ ] Attendance screen foundation
 
 ## Up Next
 - [ ] Frontend students screen foundation
-- [ ] Student profile foundation verification
 - [ ] Attendance screen foundation
 - [ ] Mobile Android dev-client verification
 
@@ -94,3 +95,4 @@
 | 2026-06-09 | Defer mobile native verification | Mobile auth code is wired, but Android dev-client builds require a stronger local Android/JDK setup |
 | 2026-06-09 | Tailwind for frontend styling | Component-scoped utility classes are a better long-term fit than growing custom page CSS |
 | 2026-06-09 | React Router for frontend navigation | Product screens need direct URLs, refresh safety, and future nested routes |
+| 2026-06-09 | Thin API controllers with service-backed actions | Controllers should coordinate HTTP only; domain querying, mapping, and processing live in services |
