@@ -49,12 +49,16 @@
 - [x] Frontend classes service connected to API
 - [x] Frontend classes table renders school-scoped data
 - [x] Demo class seeder added for local development
+- [x] Backend class creation endpoint added
+- [x] Backend class creation tests added
+- [x] Frontend class creation form added
+- [x] Frontend toast feedback added for class creation
 
 ## In Progress
-- [ ] Frontend class creation foundation
+- [ ] Frontend class management actions
 
 ## Up Next
-- [ ] Frontend class creation foundation
+- [ ] Frontend class management actions
 - [ ] Frontend students screen foundation
 - [ ] Mobile Android dev-client verification
 
