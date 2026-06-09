@@ -33,12 +33,15 @@
 - [x] Class assignment service with school-scope validation
 - [x] Phase 2 backend foundation review
 - [x] Frontend /api/me error messages surfaced from backend
+- [x] Frontend Clerk integration
+- [x] Mobile Clerk dependencies installed
+- [x] Mobile Clerk provider and /api/me profile wiring
+- [x] Mobile Expo web support configured
 
 ## In Progress
-- [ ] Frontend Clerk integration
+- [ ] Mobile Clerk integration
 
 ## Up Next
-- [ ] Frontend Clerk integration
 - [ ] Mobile Clerk integration
 
 ## Decisions Log
