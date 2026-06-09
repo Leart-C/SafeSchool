@@ -1,21 +1,19 @@
+import { useOutletContext } from 'react-router-dom'
 import { DashboardCard } from '../../components/DashboardCard'
 import { EmptyState } from '../../components/EmptyState'
+import type { MeResponse } from '../../services/meService'
 
-type DashboardHomeProps = {
-  user: {
-    name: string
-    roles: string[]
-    school: {
-      name: string
-    } | null
-  }
+type AuthenticatedOutletContext = {
+  me: MeResponse
 }
 
 function primaryRole(roles: string[]): string {
   return roles[0] ?? 'unassigned'
 }
 
-export function DashboardHome({ user }: DashboardHomeProps) {
+export function DashboardHome() {
+  const { me } = useOutletContext<AuthenticatedOutletContext>()
+  const user = me.data
   const role = primaryRole(user.roles)
 
   if (!user.school) {

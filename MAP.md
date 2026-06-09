@@ -42,13 +42,15 @@
 - [x] Frontend Tailwind foundation added
 - [x] Frontend app shell components drafted
 - [x] Frontend role-aware dashboard drafted
+- [x] Frontend React Router foundation added
+- [x] Frontend authenticated layout routes added
 
 ## In Progress
-- [ ] Frontend app shell verification
+- [ ] Frontend classes screen foundation
 
 ## Up Next
-- [ ] Frontend app shell verification
-- [ ] Frontend dashboard navigation structure
+- [ ] Frontend classes screen foundation
+- [ ] Frontend students screen foundation
 - [ ] Mobile Android dev-client verification
 
 ## Decisions Log
@@ -66,3 +68,4 @@
 | 2026-06-08 | In-memory SQLite for backend tests | Feature tests should be fast and isolated from the local MySQL development database |
 | 2026-06-09 | Defer mobile native verification | Mobile auth code is wired, but Android dev-client builds require a stronger local Android/JDK setup |
 | 2026-06-09 | Tailwind for frontend styling | Component-scoped utility classes are a better long-term fit than growing custom page CSS |
+| 2026-06-09 | React Router for frontend navigation | Product screens need direct URLs, refresh safety, and future nested routes |
