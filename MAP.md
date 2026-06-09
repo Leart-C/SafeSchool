@@ -39,12 +39,16 @@
 - [x] Mobile Expo web support configured
 - [x] Mobile Android dev-client config added
 - [x] Mobile auth foundation deferred after environment limit identified
+- [x] Frontend Tailwind foundation added
+- [x] Frontend app shell components drafted
+- [x] Frontend role-aware dashboard drafted
 
 ## In Progress
-- [ ] Frontend app shell and role-aware dashboard
+- [ ] Frontend app shell verification
 
 ## Up Next
-- [ ] Frontend app shell and role-aware dashboard
+- [ ] Frontend app shell verification
+- [ ] Frontend dashboard navigation structure
 - [ ] Mobile Android dev-client verification
 
 ## Decisions Log
@@ -61,3 +65,4 @@
 | 2026-06-08 | SchoolClass model over Class | `class` is a PHP keyword; school class membership needs role metadata and school scoping |
 | 2026-06-08 | In-memory SQLite for backend tests | Feature tests should be fast and isolated from the local MySQL development database |
 | 2026-06-09 | Defer mobile native verification | Mobile auth code is wired, but Android dev-client builds require a stronger local Android/JDK setup |
+| 2026-06-09 | Tailwind for frontend styling | Component-scoped utility classes are a better long-term fit than growing custom page CSS |

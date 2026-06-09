@@ -1,13 +1,13 @@
 import {
   SignedIn,
   SignedOut,
-  SignInButton,
-  UserButton,
   useAuth,
 } from '@clerk/clerk-react'
 import { useEffect, useState } from 'react'
+import { AppShell } from './components/AppShell'
+import { SignedOutHome } from './features/auth/SignedOutHome'
+import { DashboardHome } from './features/dashboard/DashboardHome'
 import { getMe, type MeResponse } from './services/meService'
-import './App.css'
 
 function App() {
   const { getToken, isLoaded, isSignedIn } = useAuth()
@@ -17,12 +17,15 @@ function App() {
   useEffect(() => {
     async function loadMe() {
       if (!isLoaded || !isSignedIn) {
+        setMe(null)
         return
       }
 
       try {
         const token = await getToken()
+
         if (!token) {
+          setError('No Clerk session token was returned.')
           return
         }
 
@@ -37,34 +40,27 @@ function App() {
   }, [getToken, isLoaded, isSignedIn])
 
   return (
-    <main>
-      <header>
-        <h1>SafeSchool</h1>
-        <SignedIn>
-          <UserButton />
-        </SignedIn>
-      </header>
-
+    <>
       <SignedOut>
-        <SignInButton mode="modal">
-          <button type="button">Sign in</button>
-        </SignInButton>
+        <SignedOutHome />
       </SignedOut>
 
       <SignedIn>
-        {error && <p>{error}</p>}
-        {me && !error ? (
-          <section>
-            <h2>{me.data.name}</h2>
-            <p>{me.data.email}</p>
-            <p>{me.data.roles.join(', ') || 'No role assigned'}</p>
-            <p>{me.data.school?.name ?? 'No school assigned'}</p>
-          </section>
-        ) : !error ? (
-          <p>Loading profile...</p>
-        ) : null}
+        {!isLoaded ? (
+          <main className="loading-screen">Loading SafeSchool...</main>
+        ) : error ? (
+          <main className="loading-screen">
+            <p className="app-error">{error}</p>
+          </main>
+        ) : me ? (
+          <AppShell user={me.data}>
+            <DashboardHome user={me.data} />
+          </AppShell>
+        ) : (
+          <main className="loading-screen">Loading profile...</main>
+        )}
       </SignedIn>
-    </main>
+    </>
   )
 }
 
