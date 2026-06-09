@@ -44,12 +44,17 @@
 - [x] Frontend role-aware dashboard drafted
 - [x] Frontend React Router foundation added
 - [x] Frontend authenticated layout routes added
+- [x] Backend classes index endpoint added
+- [x] Backend classes index tests added
+- [x] Frontend classes service connected to API
+- [x] Frontend classes table renders school-scoped data
+- [x] Demo class seeder added for local development
 
 ## In Progress
-- [ ] Frontend classes screen foundation
+- [ ] Frontend class creation foundation
 
 ## Up Next
-- [ ] Frontend classes screen foundation
+- [ ] Frontend class creation foundation
 - [ ] Frontend students screen foundation
 - [ ] Mobile Android dev-client verification
 
