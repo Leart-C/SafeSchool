@@ -57,13 +57,18 @@
 - [x] Backend class update/archive tests added
 - [x] Frontend class edit/archive actions added
 - [x] Frontend classes feature split into form and table components
+- [x] Backend students index endpoint added
+- [x] Backend students index tests added
+- [x] Frontend students service connected to API
+- [x] Frontend students table renders school-scoped data
+- [x] Demo student seeder added for local development
 
 ## In Progress
-- [ ] Frontend class management verification
+- [ ] Frontend student profile foundation
 
 ## Up Next
-- [ ] Frontend class management verification
 - [ ] Frontend students screen foundation
+- [ ] Frontend student profile foundation
 - [ ] Mobile Android dev-client verification
 
 ## Decisions Log
