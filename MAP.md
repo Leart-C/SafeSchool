@@ -37,12 +37,15 @@
 - [x] Mobile Clerk dependencies installed
 - [x] Mobile Clerk provider and /api/me profile wiring
 - [x] Mobile Expo web support configured
+- [x] Mobile Android dev-client config added
+- [x] Mobile auth foundation deferred after environment limit identified
 
 ## In Progress
-- [ ] Mobile Clerk integration
+- [ ] Frontend app shell and role-aware dashboard
 
 ## Up Next
-- [ ] Mobile Clerk integration
+- [ ] Frontend app shell and role-aware dashboard
+- [ ] Mobile Android dev-client verification
 
 ## Decisions Log
 | Date | Decision | Reason |
@@ -57,3 +60,4 @@
 | 2026-06-08 | Guardian/student pivot over parent_id | Real families can have multiple guardians and students; relationship metadata belongs on the link |
 | 2026-06-08 | SchoolClass model over Class | `class` is a PHP keyword; school class membership needs role metadata and school scoping |
 | 2026-06-08 | In-memory SQLite for backend tests | Feature tests should be fast and isolated from the local MySQL development database |
+| 2026-06-09 | Defer mobile native verification | Mobile auth code is wired, but Android dev-client builds require a stronger local Android/JDK setup |
