@@ -70,9 +70,15 @@
 - [x] Frontend students list split into header and table components
 - [x] Class API controller refactored to service-backed actions
 - [x] Clerk webhook controller refactored to service-backed processing
+- [x] Backend attendance records table added
+- [x] Backend attendance index endpoint added
+- [x] Backend attendance index tests added
+- [x] Frontend attendance service connected to API
+- [x] Frontend attendance table renders school-scoped records
+- [x] Demo attendance seeder added for local development
 
 ## In Progress
-- [ ] Attendance screen foundation
+- [ ] Attendance screen foundation verification
 
 ## Up Next
 - [ ] Frontend students screen foundation
