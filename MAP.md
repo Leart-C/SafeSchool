@@ -53,12 +53,16 @@
 - [x] Backend class creation tests added
 - [x] Frontend class creation form added
 - [x] Frontend toast feedback added for class creation
+- [x] Backend class update/archive endpoint added
+- [x] Backend class update/archive tests added
+- [x] Frontend class edit/archive actions added
+- [x] Frontend classes feature split into form and table components
 
 ## In Progress
-- [ ] Frontend class management actions
+- [ ] Frontend class management verification
 
 ## Up Next
-- [ ] Frontend class management actions
+- [ ] Frontend class management verification
 - [ ] Frontend students screen foundation
 - [ ] Mobile Android dev-client verification
 

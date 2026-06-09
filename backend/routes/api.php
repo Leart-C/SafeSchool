@@ -11,4 +11,5 @@ Route::middleware('clerk.auth')->group(function (): void {
     Route::get('/me', MeController::class);
     Route::get('/classes', [ClassController::class, 'index']);
     Route::post('/classes', [ClassController::class, 'store']);
+    Route::put('/classes/{class}', [ClassController::class, 'update']);
 });

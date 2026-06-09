@@ -1,16 +1,18 @@
 import { useAuth } from '@clerk/clerk-react'
 import { useEffect, useState } from 'react'
-import type { FormEventHandler } from 'react'
 import { EmptyState } from '../../components/EmptyState'
 import { Button } from '../../components/ui/Button'
 import { Card } from '../../components/ui/Card'
+import { appToast } from '../../lib/toast'
 import {
   createClass,
   getClasses,
+  updateClass,
   type CreateClassPayload,
   type SchoolClass,
 } from '../../services/classService'
-import { appToast } from '../../lib/toast'
+import { ClassForm } from './ClassForm'
+import { ClassesTable } from './ClassesTable'
 
 const initialForm: CreateClassPayload = {
   name: '',
@@ -20,10 +22,21 @@ const initialForm: CreateClassPayload = {
   is_active: true,
 }
 
+function formFromClass(schoolClass: SchoolClass): CreateClassPayload {
+  return {
+    name: schoolClass.name,
+    grade_level: schoolClass.grade_level,
+    section: schoolClass.section ?? '',
+    academic_year: schoolClass.academic_year,
+    is_active: schoolClass.is_active,
+  }
+}
+
 export function ClassesPage() {
   const { getToken, isLoaded, isSignedIn } = useAuth()
   const [classes, setClasses] = useState<SchoolClass[]>([])
   const [form, setForm] = useState<CreateClassPayload>(initialForm)
+  const [editingClass, setEditingClass] = useState<SchoolClass | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [formError, setFormError] = useState<string | null>(null)
   const [isCreateOpen, setIsCreateOpen] = useState(false)
@@ -57,44 +70,110 @@ export function ClassesPage() {
     void loadClasses()
   }, [getToken, isLoaded, isSignedIn])
 
-const handleCreateClass: FormEventHandler<HTMLFormElement> = (event) => {
-  event.preventDefault()
-  void submitCreateClass()
-}
-
-async function submitCreateClass() {
-  setFormError(null)
-  setIsSubmitting(true)
-
-  try {
-    const token = await getToken()
-
-    if (!token) {
-      setFormError('No Clerk session token was returned.')
-      return
-    }
-
-    const response = await createClass(token, {
-      ...form,
-      section: form.section?.trim() || undefined,
-    })
-
-    setClasses((currentClasses) => [...currentClasses, response.data.class])
-    appToast.success(
-      'Class created',
-      `${response.data.class.name} was added successfully.`,
-    )
+  function resetForm() {
     setForm(initialForm)
+    setEditingClass(null)
+    setFormError(null)
     setIsCreateOpen(false)
-  } catch (error) {
-    const message = error instanceof Error ? error.message : 'Failed to create class'
-
-    setFormError(message)
-    appToast.error('Could not create class', message)
-  } finally {
-    setIsSubmitting(false)
   }
-}
+
+  async function submitClassForm() {
+    setFormError(null)
+    setIsSubmitting(true)
+
+    try {
+      const token = await getToken()
+
+      if (!token) {
+        setFormError('No Clerk session token was returned.')
+        return
+      }
+
+      if (editingClass) {
+        const response = await updateClass(token, editingClass.id, {
+          ...form,
+          section: form.section?.trim() || undefined,
+        })
+
+        setClasses((currentClasses) =>
+          currentClasses.map((schoolClass) =>
+            schoolClass.id === response.data.class.id
+              ? response.data.class
+              : schoolClass,
+          ),
+        )
+
+        appToast.success(
+          'Class updated',
+          `${response.data.class.name} was updated successfully.`,
+        )
+      } else {
+        const response = await createClass(token, {
+          ...form,
+          section: form.section?.trim() || undefined,
+        })
+
+        setClasses((currentClasses) => [...currentClasses, response.data.class])
+        appToast.success(
+          'Class created',
+          `${response.data.class.name} was added successfully.`,
+        )
+      }
+
+      resetForm()
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Failed to save class'
+
+      setFormError(message)
+      appToast.error('Could not save class', message)
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  async function handleArchiveToggle(schoolClass: SchoolClass) {
+    try {
+      const token = await getToken()
+
+      if (!token) {
+        appToast.error('Could not update class', 'No Clerk session token was returned.')
+        return
+      }
+
+      const response = await updateClass(token, schoolClass.id, {
+        name: schoolClass.name,
+        grade_level: schoolClass.grade_level,
+        section: schoolClass.section ?? undefined,
+        academic_year: schoolClass.academic_year,
+        is_active: !schoolClass.is_active,
+      })
+
+      setClasses((currentClasses) =>
+        currentClasses.map((currentClass) =>
+          currentClass.id === response.data.class.id
+            ? response.data.class
+            : currentClass,
+        ),
+      )
+
+      appToast.success(
+        response.data.class.is_active ? 'Class restored' : 'Class archived',
+        `${response.data.class.name} was updated successfully.`,
+      )
+    } catch (error) {
+      appToast.error(
+        'Could not update class',
+        error instanceof Error ? error.message : 'Please try again.',
+      )
+    }
+  }
+
+  function handleEdit(schoolClass: SchoolClass) {
+    setEditingClass(schoolClass)
+    setForm(formFromClass(schoolClass))
+    setFormError(null)
+    setIsCreateOpen(true)
+  }
 
   if (isLoading) {
     return (
@@ -126,112 +205,35 @@ async function submitCreateClass() {
           </h2>
 
           <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">
-            Review and create classes scoped to your school. Teacher and student
-            assignments are counted from the class membership model.
+            Review and manage classes scoped to your school. Archived classes
+            stay available for history and reporting.
           </p>
         </div>
 
-        <Button onClick={() => setIsCreateOpen((isOpen) => !isOpen)}>
+        <Button
+          onClick={() => {
+            if (isCreateOpen) {
+              resetForm()
+              return
+            }
+
+            setIsCreateOpen(true)
+          }}
+        >
           {isCreateOpen ? 'Close form' : 'Create class'}
         </Button>
       </div>
 
       {isCreateOpen ? (
-        <Card>
-          <form className="grid gap-4 lg:grid-cols-6" onSubmit={handleCreateClass}>
-            <div className="lg:col-span-2">
-              <label className="text-sm font-medium text-slate-700" htmlFor="class-name">
-                Class name
-              </label>
-              <input
-                className="mt-2 h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-200"
-                id="class-name"
-                onChange={(event) => setForm({ ...form, name: event.target.value })}
-                placeholder="Grade 8A"
-                required
-                value={form.name}
-              />
-            </div>
-
-            <div>
-              <label className="text-sm font-medium text-slate-700" htmlFor="grade-level">
-                Grade
-              </label>
-              <input
-                className="mt-2 h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-200"
-                id="grade-level"
-                onChange={(event) => setForm({ ...form, grade_level: event.target.value })}
-                placeholder="8"
-                required
-                value={form.grade_level}
-              />
-            </div>
-
-            <div>
-              <label className="text-sm font-medium text-slate-700" htmlFor="section">
-                Section
-              </label>
-              <input
-                className="mt-2 h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-200"
-                id="section"
-                onChange={(event) => setForm({ ...form, section: event.target.value })}
-                placeholder="A"
-                value={form.section}
-              />
-            </div>
-
-            <div>
-              <label className="text-sm font-medium text-slate-700" htmlFor="academic-year">
-                Academic year
-              </label>
-              <input
-                className="mt-2 h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-200"
-                id="academic-year"
-                onChange={(event) => setForm({ ...form, academic_year: event.target.value })}
-                placeholder="2026-2027"
-                required
-                value={form.academic_year}
-              />
-            </div>
-
-            <div className="flex items-end">
-              <label className="flex h-10 items-center gap-2 text-sm font-medium text-slate-700">
-                <input
-                  checked={form.is_active}
-                  className="h-4 w-4 rounded border-slate-300"
-                  onChange={(event) => setForm({ ...form, is_active: event.target.checked })}
-                  type="checkbox"
-                />
-                Active
-              </label>
-            </div>
-
-            {formError ? (
-              <p className="lg:col-span-6 text-sm font-medium text-red-700">
-                {formError}
-              </p>
-            ) : null}
-
-            <div className="flex gap-3 lg:col-span-6">
-              <Button disabled={isSubmitting} type="submit">
-                {isSubmitting ? 'Creating...' : 'Create class'}
-              </Button>
-
-              <Button
-                disabled={isSubmitting}
-                onClick={() => {
-                  setForm(initialForm)
-                  setFormError(null)
-                  setIsCreateOpen(false)
-                }}
-                type="button"
-                variant="secondary"
-              >
-                Cancel
-              </Button>
-            </div>
-          </form>
-        </Card>
+        <ClassForm
+          error={formError}
+          form={form}
+          isSubmitting={isSubmitting}
+          onCancel={resetForm}
+          onChange={setForm}
+          onSubmit={() => void submitClassForm()}
+          submitLabel={editingClass ? 'Save changes' : 'Create class'}
+        />
       ) : null}
 
       {classes.length === 0 ? (
@@ -245,55 +247,11 @@ async function submitCreateClass() {
           }
         />
       ) : (
-        <Card className="overflow-hidden p-0">
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-slate-200 text-left text-sm">
-              <thead className="bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
-                <tr>
-                  <th className="px-5 py-3 font-semibold">Class</th>
-                  <th className="px-5 py-3 font-semibold">Grade</th>
-                  <th className="px-5 py-3 font-semibold">Academic year</th>
-                  <th className="px-5 py-3 font-semibold">Teachers</th>
-                  <th className="px-5 py-3 font-semibold">Students</th>
-                  <th className="px-5 py-3 font-semibold">Status</th>
-                </tr>
-              </thead>
-
-              <tbody className="divide-y divide-slate-100 bg-white">
-                {classes.map((schoolClass) => (
-                  <tr className="transition hover:bg-slate-50" key={schoolClass.id}>
-                    <td className="px-5 py-4 font-medium text-slate-950">
-                      {schoolClass.name}
-                    </td>
-                    <td className="px-5 py-4 text-slate-600">
-                      {schoolClass.grade_level}
-                    </td>
-                    <td className="px-5 py-4 text-slate-600">
-                      {schoolClass.academic_year}
-                    </td>
-                    <td className="px-5 py-4 text-slate-600">
-                      {schoolClass.teachers_count}
-                    </td>
-                    <td className="px-5 py-4 text-slate-600">
-                      {schoolClass.students_count}
-                    </td>
-                    <td className="px-5 py-4">
-                      <span
-                        className={`inline-flex rounded-md px-2 py-1 text-xs font-medium ${
-                          schoolClass.is_active
-                            ? 'bg-emerald-50 text-emerald-700'
-                            : 'bg-slate-100 text-slate-600'
-                        }`}
-                      >
-                        {schoolClass.is_active ? 'Active' : 'Inactive'}
-                      </span>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </Card>
+        <ClassesTable
+          classes={classes}
+          onArchiveToggle={(schoolClass) => void handleArchiveToggle(schoolClass)}
+          onEdit={handleEdit}
+        />
       )}
     </section>
   )
