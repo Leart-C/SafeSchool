@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\AttendanceController;
 use App\Http\Controllers\Api\ClassController;
 use App\Http\Controllers\Api\ClerkWebhookController;
 use App\Http\Controllers\Api\MeController;
@@ -16,4 +17,6 @@ Route::middleware('clerk.auth')->group(function (): void {
 
     Route::get('/students', [StudentController::class, 'index']);
     Route::get('/students/{student}', [StudentController::class, 'show']);
+
+    Route::get('/attendance', [AttendanceController::class, 'index']);
 });
