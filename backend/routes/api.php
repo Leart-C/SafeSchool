@@ -4,6 +4,7 @@ use App\Http\Controllers\Api\AttendanceController;
 use App\Http\Controllers\Api\ClassController;
 use App\Http\Controllers\Api\ClerkWebhookController;
 use App\Http\Controllers\Api\MeController;
+use App\Http\Controllers\Api\MessageController;
 use App\Http\Controllers\Api\StudentController;
 use Illuminate\Support\Facades\Route;
 
@@ -21,4 +22,7 @@ Route::middleware('clerk.auth')->group(function (): void {
     Route::get('/attendance', [AttendanceController::class, 'index']);
     Route::get('/classes/{class}/attendance-roster', [AttendanceController::class, 'roster']);
     Route::post('/classes/{class}/attendance-records', [AttendanceController::class, 'storeClassAttendance']);
+
+    Route::get('/messages', [MessageController::class, 'index']);
+    Route::post('/messages', [MessageController::class, 'store']);
 });

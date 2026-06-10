@@ -95,12 +95,20 @@
 - [x] Attendance backend role and class-scope access added
 - [x] Attendance role-access tests added
 - [x] Frontend attendance management UI hidden by role
+- [x] Backend messages table added
+- [x] Message model and audience enum added
+- [x] Backend message list/create endpoints added
+- [x] Backend message list/create tests added
+- [x] Frontend messages service connected to API
+- [x] Frontend messages list and create form added
+- [x] Frontend message creation gated by role
+- [x] Shared date formatter supports dates and timestamps
 
 ## In Progress
-- [ ] Attendance role-access verification and commit
+- [ ] Messaging foundation verification and commit
 
 ## Up Next
-- [ ] Messaging foundation
+- [ ] Message edit/archive flow
 - [ ] Mobile Android dev-client verification
 
 ## Decisions Log

@@ -1,6 +1,8 @@
 export const queryKeys = {
   me: ['me'] as const,
 
+  messages: ['messages'] as const,
+
   classes: ['classes'] as const,
 
   students: ['students'] as const,
