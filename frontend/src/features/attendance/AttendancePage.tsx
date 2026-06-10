@@ -6,13 +6,14 @@ import { getAttendanceRecords } from '../../services/attendanceService'
 import { AttendancePageHeader } from './AttendancePageHeader'
 import { AttendanceTable } from './AttendanceTable'
 import { AttendanceTakingPanel } from './AttendanceTakingPanel'
+import { queryKeys } from '../../lib/queryKeys'
 
 export function AttendancePage() {
   const { getToken, isLoaded, isSignedIn } = useAuth()
   const queryClient = useQueryClient()
 
   const attendanceQuery = useQuery({
-    queryKey: ['attendance-records'],
+    queryKey: queryKeys.attendanceRecords,
     enabled: isLoaded && isSignedIn,
     queryFn: async () => {
       const token = await getToken()
@@ -27,7 +28,7 @@ export function AttendancePage() {
 
   async function refreshAttendanceRecords() {
     await queryClient.invalidateQueries({
-      queryKey: ['attendance-records'],
+      queryKey: queryKeys.attendanceRecords,
     })
   }
 

@@ -3,12 +3,13 @@ import { useQuery } from '@tanstack/react-query'
 import { Outlet } from 'react-router-dom'
 import { AppShell } from '../components/AppShell'
 import { getMe } from '../services/meService'
+import { queryKeys } from '../lib/queryKeys'
 
 export function AuthenticatedLayout() {
   const { getToken, isLoaded, isSignedIn } = useAuth()
 
   const meQuery = useQuery({
-    queryKey: ['me'],
+    queryKey: queryKeys.me,
     enabled: isLoaded && isSignedIn,
     queryFn: async () => {
       const token = await getToken()

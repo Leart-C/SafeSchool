@@ -1,9 +1,11 @@
 import { useAuth } from '@clerk/clerk-react'
-import { useEffect, useState } from 'react'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useState } from 'react'
 import { EmptyState } from '../../components/EmptyState'
 import { Button } from '../../components/ui/Button'
 import { Card } from '../../components/ui/Card'
 import { appToast } from '../../lib/toast'
+import { queryKeys } from '../../lib/queryKeys'
 import {
   createClass,
   getClasses,
@@ -13,6 +15,8 @@ import {
 } from '../../services/classService'
 import { ClassForm } from './ClassForm'
 import { ClassesTable } from './ClassesTable'
+
+
 
 const initialForm: CreateClassPayload = {
   name: '',
@@ -34,41 +38,88 @@ function formFromClass(schoolClass: SchoolClass): CreateClassPayload {
 
 export function ClassesPage() {
   const { getToken, isLoaded, isSignedIn } = useAuth()
-  const [classes, setClasses] = useState<SchoolClass[]>([])
+  const queryClient = useQueryClient()
+
   const [form, setForm] = useState<CreateClassPayload>(initialForm)
   const [editingClass, setEditingClass] = useState<SchoolClass | null>(null)
-  const [error, setError] = useState<string | null>(null)
   const [formError, setFormError] = useState<string | null>(null)
   const [isCreateOpen, setIsCreateOpen] = useState(false)
-  const [isLoading, setIsLoading] = useState(true)
-  const [isSubmitting, setIsSubmitting] = useState(false)
 
-  useEffect(() => {
-    async function loadClasses() {
-      if (!isLoaded || !isSignedIn) {
-        return
+  const classesQuery = useQuery({
+    queryKey: queryKeys.classes,
+    enabled: isLoaded && isSignedIn,
+    queryFn: async () => {
+      const token = await getToken()
+
+      if (!token) {
+        throw new Error('No Clerk session token was returned.')
       }
 
-      try {
-        const token = await getToken()
+      return getClasses(token)
+    },
+  })
 
-        if (!token) {
-          setError('No Clerk session token was returned.')
-          return
-        }
+  const createClassMutation = useMutation({
+    mutationFn: async (payload: CreateClassPayload) => {
+      const token = await getToken()
 
-        setError(null)
-        const response = await getClasses(token)
-        setClasses(response.data.classes)
-      } catch (error) {
-        setError(error instanceof Error ? error.message : 'Failed to load classes')
-      } finally {
-        setIsLoading(false)
+      if (!token) {
+        throw new Error('No Clerk session token was returned.')
       }
-    }
 
-    void loadClasses()
-  }, [getToken, isLoaded, isSignedIn])
+      return createClass(token, payload)
+    },
+    onSuccess: async (response) => {
+      await queryClient.invalidateQueries({ queryKey: queryKeys.classes })
+
+      appToast.success(
+        'Class created',
+        `${response.data.class.name} was added successfully.`,
+      )
+
+      resetForm()
+    },
+    onError: (error) => {
+      const message = error instanceof Error ? error.message : 'Failed to save class'
+
+      setFormError(message)
+      appToast.error('Could not save class', message)
+    },
+  })
+
+  const updateClassMutation = useMutation({
+    mutationFn: async ({
+      classId,
+      payload,
+    }: {
+      classId: number
+      payload: CreateClassPayload
+    }) => {
+      const token = await getToken()
+
+      if (!token) {
+        throw new Error('No Clerk session token was returned.')
+      }
+
+      return updateClass(token, classId, payload)
+    },
+    onSuccess: async (response) => {
+      await queryClient.invalidateQueries({ queryKey: queryKeys.classes })
+
+      appToast.success(
+        response.data.class.is_active ? 'Class saved' : 'Class archived',
+        `${response.data.class.name} was updated successfully.`,
+      )
+
+      resetForm()
+    },
+    onError: (error) => {
+      const message = error instanceof Error ? error.message : 'Failed to save class'
+
+      setFormError(message)
+      appToast.error('Could not save class', message)
+    },
+  })
 
   function resetForm() {
     setForm(initialForm)
@@ -77,95 +128,39 @@ export function ClassesPage() {
     setIsCreateOpen(false)
   }
 
-  async function submitClassForm() {
+  function submitClassForm() {
     setFormError(null)
-    setIsSubmitting(true)
 
-    try {
-      const token = await getToken()
-
-      if (!token) {
-        setFormError('No Clerk session token was returned.')
-        return
-      }
-
-      if (editingClass) {
-        const response = await updateClass(token, editingClass.id, {
-          ...form,
-          section: form.section?.trim() || undefined,
-        })
-
-        setClasses((currentClasses) =>
-          currentClasses.map((schoolClass) =>
-            schoolClass.id === response.data.class.id
-              ? response.data.class
-              : schoolClass,
-          ),
-        )
-
-        appToast.success(
-          'Class updated',
-          `${response.data.class.name} was updated successfully.`,
-        )
-      } else {
-        const response = await createClass(token, {
-          ...form,
-          section: form.section?.trim() || undefined,
-        })
-
-        setClasses((currentClasses) => [...currentClasses, response.data.class])
-        appToast.success(
-          'Class created',
-          `${response.data.class.name} was added successfully.`,
-        )
-      }
-
-      resetForm()
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'Failed to save class'
-
-      setFormError(message)
-      appToast.error('Could not save class', message)
-    } finally {
-      setIsSubmitting(false)
+    const payload = {
+      ...form,
+      section: form.section?.trim() || undefined,
     }
+
+    if (editingClass) {
+      updateClassMutation.mutate({
+        classId: editingClass.id,
+        payload,
+      })
+
+      return
+    }
+
+    createClassMutation.mutate(payload)
   }
 
-  async function handleArchiveToggle(schoolClass: SchoolClass) {
-    try {
-      const token = await getToken()
+  function handleArchiveToggle(schoolClass: SchoolClass) {
+    setFormError(null)
 
-      if (!token) {
-        appToast.error('Could not update class', 'No Clerk session token was returned.')
-        return
-      }
-
-      const response = await updateClass(token, schoolClass.id, {
+    updateClassMutation.mutate({
+      classId: schoolClass.id,
+      payload: {
         name: schoolClass.name,
         grade_level: schoolClass.grade_level,
         section: schoolClass.section ?? undefined,
         academic_year: schoolClass.academic_year,
         is_active: !schoolClass.is_active,
-      })
-
-      setClasses((currentClasses) =>
-        currentClasses.map((currentClass) =>
-          currentClass.id === response.data.class.id
-            ? response.data.class
-            : currentClass,
-        ),
-      )
-
-      appToast.success(
-        response.data.class.is_active ? 'Class restored' : 'Class archived',
-        `${response.data.class.name} was updated successfully.`,
-      )
-    } catch (error) {
-      appToast.error(
-        'Could not update class',
-        error instanceof Error ? error.message : 'Please try again.',
-      )
-    }
+      },
+    })
   }
 
   function handleEdit(schoolClass: SchoolClass) {
@@ -175,7 +170,10 @@ export function ClassesPage() {
     setIsCreateOpen(true)
   }
 
-  if (isLoading) {
+  const isSubmitting = createClassMutation.isPending || updateClassMutation.isPending
+  const classes = classesQuery.data?.data.classes ?? []
+
+  if (classesQuery.isLoading) {
     return (
       <Card>
         <p className="text-sm text-slate-600">Loading classes...</p>
@@ -183,11 +181,15 @@ export function ClassesPage() {
     )
   }
 
-  if (error) {
+  if (classesQuery.isError) {
     return (
       <EmptyState
         title="Could not load classes"
-        description={error}
+        description={
+          classesQuery.error instanceof Error
+            ? classesQuery.error.message
+            : 'Failed to load classes'
+        }
       />
     )
   }
@@ -231,7 +233,7 @@ export function ClassesPage() {
           isSubmitting={isSubmitting}
           onCancel={resetForm}
           onChange={setForm}
-          onSubmit={() => void submitClassForm()}
+          onSubmit={submitClassForm}
           submitLabel={editingClass ? 'Save changes' : 'Create class'}
         />
       ) : null}
@@ -249,7 +251,7 @@ export function ClassesPage() {
       ) : (
         <ClassesTable
           classes={classes}
-          onArchiveToggle={(schoolClass) => void handleArchiveToggle(schoolClass)}
+          onArchiveToggle={handleArchiveToggle}
           onEdit={handleEdit}
         />
       )}

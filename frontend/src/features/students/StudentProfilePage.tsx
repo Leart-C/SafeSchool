@@ -1,53 +1,39 @@
 import { useAuth } from '@clerk/clerk-react'
+import { useQuery } from '@tanstack/react-query'
 import { Link, useParams } from 'react-router-dom'
-import { useEffect, useState } from 'react'
 import { EmptyState } from '../../components/EmptyState'
 import { Button } from '../../components/ui/Button'
 import { Card } from '../../components/ui/Card'
-import {
-  getStudent,
-  type StudentProfile,
-} from '../../services/studentService'
+import { getStudent } from '../../services/studentService'
 import { StudentClassesPanel } from './StudentClassesPanel'
 import { StudentGuardiansPanel } from './StudentGuardiansPanel'
 import { StudentProfileHeader } from './StudentProfileHeader'
 import { StudentSummaryCards } from './StudentSummaryCards'
+import { queryKeys } from '../../lib/queryKeys'
 
 export function StudentProfilePage() {
   const { studentId } = useParams()
   const { getToken, isLoaded, isSignedIn } = useAuth()
-  const [student, setStudent] = useState<StudentProfile | null>(null)
-  const [error, setError] = useState<string | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
 
-  useEffect(() => {
-    async function loadStudent() {
-      if (!isLoaded || !isSignedIn || !studentId) {
-        return
+  const studentQuery = useQuery({
+    queryKey: queryKeys.student(studentId),
+    enabled: isLoaded && isSignedIn && Boolean(studentId),
+    queryFn: async () => {
+      if (!studentId) {
+        throw new Error('Student id is missing.')
       }
 
-      try {
-        const token = await getToken()
+      const token = await getToken()
 
-        if (!token) {
-          setError('No Clerk session token was returned.')
-          return
-        }
-
-        setError(null)
-        const response = await getStudent(token, studentId)
-        setStudent(response.data.student)
-      } catch (error) {
-        setError(error instanceof Error ? error.message : 'Failed to load student')
-      } finally {
-        setIsLoading(false)
+      if (!token) {
+        throw new Error('No Clerk session token was returned.')
       }
-    }
 
-    void loadStudent()
-  }, [getToken, isLoaded, isSignedIn, studentId])
+      return getStudent(token, studentId)
+    },
+  })
 
-  if (isLoading) {
+  if (studentQuery.isLoading) {
     return (
       <Card>
         <p className="text-sm text-slate-600">Loading student profile...</p>
@@ -55,11 +41,15 @@ export function StudentProfilePage() {
     )
   }
 
-  if (error) {
+  if (studentQuery.isError) {
     return (
       <EmptyState
         title="Could not load student"
-        description={error}
+        description={
+          studentQuery.error instanceof Error
+            ? studentQuery.error.message
+            : 'Failed to load student'
+        }
         action={
           <Link to="/app/students">
             <Button variant="secondary">Back to students</Button>
@@ -68,6 +58,8 @@ export function StudentProfilePage() {
       />
     )
   }
+
+  const student = studentQuery.data?.data.student
 
   if (!student) {
     return (

@@ -85,13 +85,18 @@
 - [x] Frontend TanStack Query provider added
 - [x] Authenticated profile migrated to TanStack Query
 - [x] Attendance records migrated to TanStack Query
+- [x] Frontend TanStack Query foundation completed
+- [x] Classes page migrated to TanStack Query
+- [x] Students list migrated to TanStack Query
+- [x] Student profile migrated to TanStack Query
+- [x] Attendance taking panel migrated to TanStack Query
+- [x] Centralized frontend query keys added
 
 ## In Progress
-- [ ] Attendance branch verification and commit
+- [ ] Frontend query foundation verification and commit
 
 ## Up Next
 - [ ] Attendance permissions and role-based access
-- [ ] Migrate remaining frontend API pages to TanStack Query
 - [ ] Messaging foundation
 - [ ] Mobile Android dev-client verification
 
