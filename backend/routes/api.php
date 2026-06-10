@@ -25,4 +25,6 @@ Route::middleware('clerk.auth')->group(function (): void {
 
     Route::get('/messages', [MessageController::class, 'index']);
     Route::post('/messages', [MessageController::class, 'store']);
+    Route::put('/messages/{message}', [MessageController::class, 'update']);
+    Route::post('/messages/{message}/archive', [MessageController::class, 'archive']);
 });

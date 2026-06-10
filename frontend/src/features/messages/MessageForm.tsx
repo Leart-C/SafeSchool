@@ -1,9 +1,9 @@
+import { Button } from '../../components/ui/Button'
+import { Card } from '../../components/ui/Card'
 import type {
   CreateMessagePayload,
   MessageAudience,
 } from '../../services/messageService'
-import { Button } from '../../components/ui/Button'
-import { Card } from '../../components/ui/Card'
 
 type MessageFormProps = {
   error: string | null
@@ -12,6 +12,7 @@ type MessageFormProps = {
   onCancel: () => void
   onChange: (form: CreateMessagePayload) => void
   onSubmit: () => void
+  submitLabel: string
 }
 
 const audiences: Array<{
@@ -31,6 +32,7 @@ export function MessageForm({
   onCancel,
   onChange,
   onSubmit,
+  submitLabel,
 }: MessageFormProps) {
   return (
     <Card>
@@ -131,7 +133,7 @@ export function MessageForm({
 
         <div className="flex flex-wrap gap-3">
           <Button disabled={isSubmitting} type="submit">
-            {isSubmitting ? 'Publishing...' : 'Publish message'}
+            {isSubmitting ? 'Saving...' : submitLabel}
           </Button>
 
           <Button

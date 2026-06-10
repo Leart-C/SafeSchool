@@ -108,12 +108,17 @@
 - [x] Director attendance access added
 - [x] Director dashboard access added
 - [x] Director role access tests added
+- [x] Message lifecycle fields added
+- [x] Backend message update/archive endpoints added
+- [x] Backend archived messages hidden from active list
+- [x] Backend message lifecycle tests added
+- [x] Frontend message edit/archive actions added
 
 ## In Progress
-- [ ] Director role foundation verification and commit
+- [ ] Message edit/archive verification and commit
 
 ## Up Next
-- [ ] Message edit/archive flow
+- [ ] Frontend UI system/template foundation
 - [ ] Mobile Android dev-client verification
 
 ## Decisions Log

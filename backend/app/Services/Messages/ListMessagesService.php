@@ -14,6 +14,7 @@ class ListMessagesService
     {
         return Message::query()
             ->where('school_id', $schoolId)
+            ->whereNull('archived_at')
             ->with([
                 'sender:id,name,email',
                 'schoolClass:id,name,grade_level,section',
@@ -28,6 +29,8 @@ class ListMessagesService
                 'title' => $message->title,
                 'body' => $message->body,
                 'published_at' => $message->published_at?->toISOString(),
+                'edited_at' => $message->edited_at?->toISOString(),
+                'archived_at' => $message->archived_at?->toISOString(),
                 'sender' => [
                     'id' => $message->sender->id,
                     'name' => $message->sender->name,

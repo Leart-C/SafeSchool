@@ -57,3 +57,34 @@ export async function apiPost<T>(
 
   return response.json() as Promise<T>
 }
+
+export async function apiPut<T>(
+  path: string,
+  token: string,
+  payload: unknown,
+): Promise<T> {
+  const response = await fetch(`${apiUrl}${path}`, {
+    method: 'PUT',
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(payload),
+  })
+
+  if (!response.ok) {
+    let message = `API request failed with status ${response.status}`
+
+    try {
+      const body = (await response.json()) as { message?: string }
+      message = body.message ?? message
+    } catch {
+      // Keep the generic status message if the response is not JSON.
+    }
+
+    throw new Error(message)
+  }
+
+  return response.json() as Promise<T>
+}
