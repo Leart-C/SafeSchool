@@ -16,6 +16,8 @@ class Message extends Model
         'title',
         'body',
         'published_at',
+        'edited_at',
+        'archived_at',
     ];
 
     protected function casts(): array
@@ -23,6 +25,8 @@ class Message extends Model
         return [
             'audience' => MessageAudience::class,
             'published_at' => 'datetime',
+            'edited_at' => 'datetime',
+            'archived_at' => 'datetime',
         ];
     }
 

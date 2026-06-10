@@ -9,9 +9,12 @@ import { queryKeys } from '../../lib/queryKeys'
 import { canCreateMessages } from '../../lib/roles'
 import { appToast } from '../../lib/toast'
 import {
+  archiveMessage,
   createMessage,
   getMessages,
+  updateMessage,
   type CreateMessagePayload,
+  type Message,
 } from '../../services/messageService'
 import type { MeResponse } from '../../services/meService'
 import { MessageForm } from './MessageForm'
@@ -30,12 +33,23 @@ const initialForm: CreateMessagePayload = {
   publish_now: true,
 }
 
+function formFromMessage(message: Message): CreateMessagePayload {
+  return {
+    audience: message.audience,
+    school_class_id: message.class?.id ?? null,
+    title: message.title,
+    body: message.body,
+    publish_now: message.published_at !== null,
+  }
+}
+
 export function MessagesPage() {
   const { me } = useOutletContext<AuthenticatedOutletContext>()
   const { getToken, isLoaded, isSignedIn } = useAuth()
   const queryClient = useQueryClient()
 
   const [form, setForm] = useState<CreateMessagePayload>(initialForm)
+  const [editingMessage, setEditingMessage] = useState<Message | null>(null)
   const [formError, setFormError] = useState<string | null>(null)
   const [isFormOpen, setIsFormOpen] = useState(false)
 
@@ -85,8 +99,70 @@ export function MessagesPage() {
     },
   })
 
+  const updateMessageMutation = useMutation({
+    mutationFn: async ({
+      messageId,
+      payload,
+    }: {
+      messageId: number
+      payload: CreateMessagePayload
+    }) => {
+      const token = await getToken()
+
+      if (!token) {
+        throw new Error('No Clerk session token was returned.')
+      }
+
+      return updateMessage(token, messageId, payload)
+    },
+    onSuccess: async (response) => {
+      await queryClient.invalidateQueries({
+        queryKey: queryKeys.messages,
+      })
+
+      appToast.success(
+        'Message updated',
+        `${response.data.message.title} was updated successfully.`,
+      )
+
+      resetForm()
+    },
+    onError: (error) => {
+      const message = error instanceof Error ? error.message : 'Failed to update message'
+
+      setFormError(message)
+      appToast.error('Could not update message', message)
+    },
+  })
+
+  const archiveMessageMutation = useMutation({
+    mutationFn: async (messageId: number) => {
+      const token = await getToken()
+
+      if (!token) {
+        throw new Error('No Clerk session token was returned.')
+      }
+
+      return archiveMessage(token, messageId)
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({
+        queryKey: queryKeys.messages,
+      })
+
+      appToast.success('Message archived', 'The message was removed from the active list.')
+    },
+    onError: (error) => {
+      appToast.error(
+        'Could not archive message',
+        error instanceof Error ? error.message : 'Please try again.',
+      )
+    },
+  })
+
   function resetForm() {
     setForm(initialForm)
+    setEditingMessage(null)
     setFormError(null)
     setIsFormOpen(false)
   }
@@ -94,11 +170,33 @@ export function MessagesPage() {
   function submitMessage() {
     setFormError(null)
 
-    createMessageMutation.mutate({
+    const payload = {
       ...form,
       title: form.title.trim(),
       body: form.body.trim(),
-    })
+    }
+
+    if (editingMessage) {
+      updateMessageMutation.mutate({
+        messageId: editingMessage.id,
+        payload,
+      })
+
+      return
+    }
+
+    createMessageMutation.mutate(payload)
+  }
+
+  function handleEdit(message: Message) {
+    setEditingMessage(message)
+    setForm(formFromMessage(message))
+    setFormError(null)
+    setIsFormOpen(true)
+  }
+
+  function handleArchive(message: Message) {
+    archiveMessageMutation.mutate(message.id)
   }
 
   if (messagesQuery.isLoading) {
@@ -123,6 +221,7 @@ export function MessagesPage() {
   }
 
   const messages = messagesQuery.data?.data.messages ?? []
+  const isSubmitting = createMessageMutation.isPending || updateMessageMutation.isPending
 
   return (
     <section className="space-y-6">
@@ -149,10 +248,11 @@ export function MessagesPage() {
         <MessageForm
           error={formError}
           form={form}
-          isSubmitting={createMessageMutation.isPending}
+          isSubmitting={isSubmitting}
           onCancel={resetForm}
           onChange={setForm}
           onSubmit={submitMessage}
+          submitLabel={editingMessage ? 'Save changes' : 'Publish message'}
         />
       ) : null}
 
@@ -169,7 +269,12 @@ export function MessagesPage() {
           }
         />
       ) : (
-        <MessagesList messages={messages} />
+        <MessagesList
+          canManage={canCreate}
+          messages={messages}
+          onArchive={handleArchive}
+          onEdit={handleEdit}
+        />
       )}
     </section>
   )

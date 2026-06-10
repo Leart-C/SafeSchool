@@ -1,4 +1,4 @@
-import { apiGet, apiPost } from './api'
+import { apiGet, apiPost, apiPut } from './api'
 
 export type MessageAudience = 'school' | 'teachers' | 'parents' | 'students' | 'class'
 
@@ -8,6 +8,8 @@ export type Message = {
   title: string
   body: string
   published_at: string | null
+  edited_at: string | null
+  archived_at: string | null
   sender: {
     id: number
     name: string
@@ -52,4 +54,37 @@ export function createMessage(
   payload: CreateMessagePayload,
 ): Promise<CreateMessageResponse> {
   return apiPost<CreateMessageResponse>('/messages', token, payload)
+}
+
+export type UpdateMessagePayload = CreateMessagePayload
+
+export type UpdateMessageResponse = {
+  data: {
+    message: Message
+  }
+  message: string
+}
+
+export function updateMessage(
+  token: string,
+  messageId: number,
+  payload: UpdateMessagePayload,
+): Promise<UpdateMessageResponse> {
+  return apiPut<UpdateMessageResponse>(`/messages/${messageId}`, token, payload)
+}
+
+export type ArchiveMessageResponse = {
+  data: null
+  message: string
+}
+
+export function archiveMessage(
+  token: string,
+  messageId: number,
+): Promise<ArchiveMessageResponse> {
+  return apiPost<ArchiveMessageResponse>(
+    `/messages/${messageId}/archive`,
+    token,
+    {},
+  )
 }
