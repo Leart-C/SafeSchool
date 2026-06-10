@@ -9,9 +9,10 @@ use App\Models\SchoolClass;
 use App\Models\User;
 use Firebase\JWT\JWT;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
-class AttendanceIndexTest extends TestCase
+class ClassAttendanceRosterTest extends TestCase
 {
     use RefreshDatabase;
 
@@ -42,9 +43,84 @@ class AttendanceIndexTest extends TestCase
             'clerk.jwt_audience' => 'safeschool-api',
             'clerk.jwt_authorized_parties' => ['http://localhost:5173'],
         ]);
+
+        Role::findOrCreate('student');
     }
 
-    public function test_it_lists_attendance_records_for_the_authenticated_users_school(): void
+    public function test_it_returns_class_roster_with_existing_attendance_for_date(): void
+    {
+        $school = School::query()->create([
+            'name' => 'SafeSchool Demo',
+            'slug' => 'safe-school-demo',
+            'timezone' => 'Europe/Tirane',
+            'is_active' => true,
+        ]);
+
+        $admin = User::factory()->create([
+            'school_id' => $school->id,
+            'clerk_user_id' => 'user_123',
+        ]);
+
+        $student = User::factory()->create([
+            'school_id' => $school->id,
+            'name' => 'Ada Lovelace',
+            'first_name' => 'Ada',
+            'last_name' => 'Lovelace',
+            'email' => 'ada.student@example.com',
+        ]);
+        $student->assignRole('student');
+
+        $class = SchoolClass::query()->create([
+            'school_id' => $school->id,
+            'name' => 'Grade 5A',
+            'grade_level' => '5',
+            'section' => 'A',
+            'academic_year' => '2026-2027',
+            'is_active' => true,
+        ]);
+
+        $class->users()->attach($student->id, ['role' => 'student']);
+
+        $record = AttendanceRecord::query()->create([
+            'school_id' => $school->id,
+            'school_class_id' => $class->id,
+            'student_user_id' => $student->id,
+            'recorded_by_user_id' => $admin->id,
+            'attendance_date' => '2026-06-09',
+            'status' => AttendanceStatus::Present->value,
+            'note' => 'On time.',
+        ]);
+
+        $this
+            ->withToken($this->tokenFor($admin->clerk_user_id))
+            ->getJson("/api/classes/{$class->id}/attendance-roster?date=2026-06-09")
+            ->assertOk()
+            ->assertJson([
+                'message' => 'Attendance roster retrieved.',
+                'data' => [
+                    'roster' => [
+                        'class' => [
+                            'id' => $class->id,
+                            'name' => 'Grade 5A',
+                        ],
+                        'attendance_date' => '2026-06-09',
+                        'students' => [
+                            [
+                                'id' => $student->id,
+                                'name' => 'Ada Lovelace',
+                                'attendance' => [
+                                    'id' => $record->id,
+                                    'status' => 'present',
+                                    'note' => 'On time.',
+                                ],
+                            ],
+                        ],
+                    ],
+                ],
+            ]);
+    }
+
+    public function test_it_rejects_classes_from_another_school(): void
     {
         $school = School::query()->create([
             'name' => 'SafeSchool Demo',
@@ -63,15 +139,38 @@ class AttendanceIndexTest extends TestCase
         $admin = User::factory()->create([
             'school_id' => $school->id,
             'clerk_user_id' => 'user_123',
-            'name' => 'Admin User',
         ]);
 
-        $student = User::factory()->create([
+        $class = SchoolClass::query()->create([
+            'school_id' => $otherSchool->id,
+            'name' => 'Hidden Class',
+            'grade_level' => '6',
+            'section' => 'B',
+            'academic_year' => '2026-2027',
+            'is_active' => true,
+        ]);
+
+        $this
+            ->withToken($this->tokenFor($admin->clerk_user_id))
+            ->getJson("/api/classes/{$class->id}/attendance-roster?date=2026-06-09")
+            ->assertNotFound()
+            ->assertJson([
+                'message' => 'Class was not found for this school.',
+            ]);
+    }
+
+    public function test_it_validates_date(): void
+    {
+        $school = School::query()->create([
+            'name' => 'SafeSchool Demo',
+            'slug' => 'safe-school-demo',
+            'timezone' => 'Europe/Tirane',
+            'is_active' => true,
+        ]);
+
+        $admin = User::factory()->create([
             'school_id' => $school->id,
-            'name' => 'Ada Lovelace',
-            'first_name' => 'Ada',
-            'last_name' => 'Lovelace',
-            'email' => 'ada.student@example.com',
+            'clerk_user_id' => 'user_123',
         ]);
 
         $class = SchoolClass::query()->create([
@@ -83,94 +182,11 @@ class AttendanceIndexTest extends TestCase
             'is_active' => true,
         ]);
 
-        $record = AttendanceRecord::query()->create([
-            'school_id' => $school->id,
-            'school_class_id' => $class->id,
-            'student_user_id' => $student->id,
-            'recorded_by_user_id' => $admin->id,
-            'attendance_date' => '2026-06-09',
-            'status' => AttendanceStatus::Present->value,
-            'note' => 'On time.',
-        ]);
-
-        $otherStudent = User::factory()->create([
-            'school_id' => $otherSchool->id,
-            'name' => 'Hidden Student',
-        ]);
-
-        $otherClass = SchoolClass::query()->create([
-            'school_id' => $otherSchool->id,
-            'name' => 'Hidden Class',
-            'grade_level' => '6',
-            'section' => 'B',
-            'academic_year' => '2026-2027',
-            'is_active' => true,
-        ]);
-
-        AttendanceRecord::query()->create([
-            'school_id' => $otherSchool->id,
-            'school_class_id' => $otherClass->id,
-            'student_user_id' => $otherStudent->id,
-            'recorded_by_user_id' => null,
-            'attendance_date' => '2026-06-09',
-            'status' => AttendanceStatus::Absent->value,
-            'note' => 'Hidden.',
-        ]);
-
         $this
             ->withToken($this->tokenFor($admin->clerk_user_id))
-            ->getJson('/api/attendance')
-            ->assertOk()
-            ->assertJson([
-                'message' => 'Attendance records retrieved.',
-                'data' => [
-                    'attendance_records' => [
-                        [
-                            'id' => $record->id,
-                            'attendance_date' => '2026-06-09',
-                            'status' => 'present',
-                            'note' => 'On time.',
-                            'class' => [
-                                'id' => $class->id,
-                                'name' => 'Grade 5A',
-                                'grade_level' => '5',
-                                'section' => 'A',
-                            ],
-                            'student' => [
-                                'id' => $student->id,
-                                'name' => 'Ada Lovelace',
-                                'email' => 'ada.student@example.com',
-                            ],
-                            'recorded_by' => [
-                                'id' => $admin->id,
-                                'name' => 'Admin User',
-                            ],
-                        ],
-                    ],
-                ],
-            ])
-            ->assertJsonMissing([
-                'name' => 'Hidden Student',
-            ])
-            ->assertJsonMissing([
-                'name' => 'Hidden Class',
-            ]);
-    }
-
-    public function test_it_rejects_users_without_school_scope(): void
-    {
-        $admin = User::factory()->create([
-            'school_id' => null,
-            'clerk_user_id' => 'user_123',
-        ]);
-
-        $this
-            ->withToken($this->tokenFor($admin->clerk_user_id))
-            ->getJson('/api/attendance')
-            ->assertForbidden()
-            ->assertJson([
-                'message' => 'Authenticated user is not assigned to a school.',
-            ]);
+            ->getJson("/api/classes/{$class->id}/attendance-roster")
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors(['date']);
     }
 
     private function tokenFor(string $clerkUserId): string

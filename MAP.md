@@ -76,13 +76,19 @@
 - [x] Frontend attendance service connected to API
 - [x] Frontend attendance table renders school-scoped records
 - [x] Demo attendance seeder added for local development
+- [x] Backend class attendance roster endpoint added
+- [x] Backend class attendance roster tests added
+- [x] Backend class attendance save endpoint added
+- [x] Backend class attendance save tests added
+- [x] Frontend attendance taking UI added
+- [x] Frontend attendance save feedback and roster refresh added
 
 ## In Progress
-- [ ] Attendance screen foundation verification
+- [ ] Attendance branch verification and commit
 
 ## Up Next
-- [ ] Frontend students screen foundation
-- [ ] Attendance screen foundation
+- [ ] Attendance permissions and role-based access
+- [ ] Messaging foundation
 - [ ] Mobile Android dev-client verification
 
 ## Decisions Log

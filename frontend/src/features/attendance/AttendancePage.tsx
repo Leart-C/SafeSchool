@@ -1,5 +1,5 @@
 import { useAuth } from '@clerk/clerk-react'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { EmptyState } from '../../components/EmptyState'
 import { Card } from '../../components/ui/Card'
 import {
@@ -8,6 +8,7 @@ import {
 } from '../../services/attendanceService'
 import { AttendancePageHeader } from './AttendancePageHeader'
 import { AttendanceTable } from './AttendanceTable'
+import { AttendanceTakingPanel } from './AttendanceTakingPanel'
 
 export function AttendancePage() {
   const { getToken, isLoaded, isSignedIn } = useAuth()
@@ -15,32 +16,32 @@ export function AttendancePage() {
   const [error, setError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(true)
 
-  useEffect(() => {
-    async function loadAttendanceRecords() {
-      if (!isLoaded || !isSignedIn) {
+  const loadAttendanceRecords = useCallback(async () => {
+    if (!isLoaded || !isSignedIn) {
+      return
+    }
+
+    try {
+      const token = await getToken()
+
+      if (!token) {
+        setError('No Clerk session token was returned.')
         return
       }
 
-      try {
-        const token = await getToken()
-
-        if (!token) {
-          setError('No Clerk session token was returned.')
-          return
-        }
-
-        setError(null)
-        const response = await getAttendanceRecords(token)
-        setRecords(response.data.attendance_records)
-      } catch (error) {
-        setError(error instanceof Error ? error.message : 'Failed to load attendance records')
-      } finally {
-        setIsLoading(false)
-      }
+      setError(null)
+      const response = await getAttendanceRecords(token)
+      setRecords(response.data.attendance_records)
+    } catch (error) {
+      setError(error instanceof Error ? error.message : 'Failed to load attendance records')
+    } finally {
+      setIsLoading(false)
     }
-
-    void loadAttendanceRecords()
   }, [getToken, isLoaded, isSignedIn])
+
+  useEffect(() => {
+    void loadAttendanceRecords()
+  }, [loadAttendanceRecords])
 
   if (isLoading) {
     return (
@@ -52,26 +53,32 @@ export function AttendancePage() {
 
   if (error) {
     return (
-      <EmptyState
-        title="Could not load attendance"
-        description={error}
-      />
-    )
-  }
+      <section className="space-y-6">
+        <AttendancePageHeader />
+        <AttendanceTakingPanel onSaved={loadAttendanceRecords} />
 
-  if (records.length === 0) {
-    return (
-      <EmptyState
-        title="No attendance records yet"
-        description="Attendance records will appear here after teachers begin taking attendance."
-      />
+        <EmptyState
+          title="Could not load attendance"
+          description={error}
+        />
+      </section>
     )
   }
 
   return (
     <section className="space-y-6">
       <AttendancePageHeader />
-      <AttendanceTable records={records} />
+
+      <AttendanceTakingPanel onSaved={loadAttendanceRecords} />
+
+      {records.length === 0 ? (
+        <EmptyState
+          title="No attendance records yet"
+          description="Attendance records will appear here after teachers begin taking attendance."
+        />
+      ) : (
+        <AttendanceTable records={records} />
+      )}
     </section>
   )
 }
