@@ -65,6 +65,28 @@ export function DashboardHome() {
           </>
         ) : null}
 
+        {role === 'director' ? (
+          <>
+            <DashboardCard
+              title="Attendance"
+              value="Live"
+              description="Review school-wide attendance and follow up with staff."
+              tone="success"
+            />
+            <DashboardCard
+              title="Messages"
+              value="Ready"
+              description="Publish school-wide announcements for staff and families."
+            />
+            <DashboardCard
+              title="Reports"
+              value="Soon"
+              description="Leadership reports will summarize attendance, classes, and student trends."
+              tone="warning"
+            />
+          </>
+        ) : null}
+
         {role === 'teacher' ? (
           <>
             <DashboardCard
