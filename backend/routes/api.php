@@ -19,4 +19,6 @@ Route::middleware('clerk.auth')->group(function (): void {
     Route::get('/students/{student}', [StudentController::class, 'show']);
 
     Route::get('/attendance', [AttendanceController::class, 'index']);
+    Route::get('/classes/{class}/attendance-roster', [AttendanceController::class, 'roster']);
+    Route::post('/classes/{class}/attendance-records', [AttendanceController::class, 'storeClassAttendance']);
 });
