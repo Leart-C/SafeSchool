@@ -91,12 +91,15 @@
 - [x] Student profile migrated to TanStack Query
 - [x] Attendance taking panel migrated to TanStack Query
 - [x] Centralized frontend query keys added
+- [x] Attendance role permissions seeded
+- [x] Attendance backend role and class-scope access added
+- [x] Attendance role-access tests added
+- [x] Frontend attendance management UI hidden by role
 
 ## In Progress
-- [ ] Frontend query foundation verification and commit
+- [ ] Attendance role-access verification and commit
 
 ## Up Next
-- [ ] Attendance permissions and role-based access
 - [ ] Messaging foundation
 - [ ] Mobile Android dev-client verification
 

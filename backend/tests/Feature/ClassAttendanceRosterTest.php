@@ -7,9 +7,9 @@ use App\Models\AttendanceRecord;
 use App\Models\School;
 use App\Models\SchoolClass;
 use App\Models\User;
+use Database\Seeders\RoleSeeder;
 use Firebase\JWT\JWT;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
 class ClassAttendanceRosterTest extends TestCase
@@ -44,7 +44,7 @@ class ClassAttendanceRosterTest extends TestCase
             'clerk.jwt_authorized_parties' => ['http://localhost:5173'],
         ]);
 
-        Role::findOrCreate('student');
+        $this->seed(RoleSeeder::class);
     }
 
     public function test_it_returns_class_roster_with_existing_attendance_for_date(): void
@@ -60,6 +60,7 @@ class ClassAttendanceRosterTest extends TestCase
             'school_id' => $school->id,
             'clerk_user_id' => 'user_123',
         ]);
+        $admin->assignRole('admin');
 
         $student = User::factory()->create([
             'school_id' => $school->id,
@@ -140,6 +141,7 @@ class ClassAttendanceRosterTest extends TestCase
             'school_id' => $school->id,
             'clerk_user_id' => 'user_123',
         ]);
+        $admin->assignRole('admin');
 
         $class = SchoolClass::query()->create([
             'school_id' => $otherSchool->id,
@@ -172,6 +174,7 @@ class ClassAttendanceRosterTest extends TestCase
             'school_id' => $school->id,
             'clerk_user_id' => 'user_123',
         ]);
+        $admin->assignRole('admin');
 
         $class = SchoolClass::query()->create([
             'school_id' => $school->id,
