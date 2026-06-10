@@ -1,10 +1,12 @@
 import { useAuth } from '@clerk/clerk-react'
-import { useEffect, useMemo, useState } from 'react'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useMemo, useState } from 'react'
 import { Button } from '../../components/ui/Button'
 import { Card } from '../../components/ui/Card'
-import { appToast } from '../../lib/toast'
-import { getClasses, type SchoolClass } from '../../services/classService'
 import { formatDisplayDate } from '../../lib/date'
+import { appToast } from '../../lib/toast'
+import { getClasses } from '../../services/classService'
+import { queryKeys } from '../../lib/queryKeys'
 import {
   getClassAttendanceRoster,
   storeClassAttendance,
@@ -34,104 +36,74 @@ function createDraftRecords(roster: AttendanceRoster): AttendanceDraftRecord[] {
 
 export function AttendanceTakingPanel({ onSaved }: AttendanceTakingPanelProps) {
   const { getToken, isLoaded, isSignedIn } = useAuth()
-  const [classes, setClasses] = useState<SchoolClass[]>([])
+  const queryClient = useQueryClient()
+
   const [selectedClassId, setSelectedClassId] = useState<number | null>(null)
   const [attendanceDate, setAttendanceDate] = useState(today)
   const [roster, setRoster] = useState<AttendanceRoster | null>(null)
   const [records, setRecords] = useState<AttendanceDraftRecord[]>([])
-  const [error, setError] = useState<string | null>(null)
-  const [isLoadingClasses, setIsLoadingClasses] = useState(true)
-  const [isLoadingRoster, setIsLoadingRoster] = useState(false)
-  const [isSaving, setIsSaving] = useState(false)
+  const [actionError, setActionError] = useState<string | null>(null)
+
+  const classesQuery = useQuery({
+    queryKey: queryKeys.classes,
+    enabled: isLoaded && isSignedIn,
+    queryFn: async () => {
+      const token = await getToken()
+
+      if (!token) {
+        throw new Error('No Clerk session token was returned.')
+      }
+
+      return getClasses(token)
+    },
+  })
 
   const activeClasses = useMemo(
-    () => classes.filter((schoolClass) => schoolClass.is_active),
-    [classes],
+    () =>
+      classesQuery.data?.data.classes.filter(
+        (schoolClass) => schoolClass.is_active,
+      ) ?? [],
+    [classesQuery.data],
   )
 
-  useEffect(() => {
-    async function loadClasses() {
-      if (!isLoaded || !isSignedIn) {
-        return
+  const effectiveSelectedClassId =
+    selectedClassId ?? activeClasses[0]?.id ?? null
+
+  const rosterQuery = useQuery({
+    queryKey: queryKeys.attendanceRoster(effectiveSelectedClassId, attendanceDate),
+    enabled: false,
+    queryFn: async () => {
+      if (!effectiveSelectedClassId) {
+        throw new Error('Select a class before loading the roster.')
       }
 
-      try {
-        const token = await getToken()
-
-        if (!token) {
-          setError('No Clerk session token was returned.')
-          return
-        }
-
-        const response = await getClasses(token)
-        const availableClasses = response.data.classes.filter(
-          (schoolClass) => schoolClass.is_active,
-        )
-
-        setClasses(response.data.classes)
-        setSelectedClassId(availableClasses[0]?.id ?? null)
-      } catch (error) {
-        setError(error instanceof Error ? error.message : 'Failed to load classes')
-      } finally {
-        setIsLoadingClasses(false)
-      }
-    }
-
-    void loadClasses()
-  }, [getToken, isLoaded, isSignedIn])
-
-  async function loadRoster() {
-    if (!selectedClassId) {
-      setRoster(null)
-      setRecords([])
-      return
-    }
-
-    setError(null)
-    setIsLoadingRoster(true)
-
-    try {
       const token = await getToken()
 
       if (!token) {
-        setError('No Clerk session token was returned.')
-        return
+        throw new Error('No Clerk session token was returned.')
       }
 
-      const response = await getClassAttendanceRoster(
+      return getClassAttendanceRoster(
         token,
-        selectedClassId,
+        effectiveSelectedClassId,
         attendanceDate,
       )
+    },
+  })
 
-      setRoster(response.data.roster)
-      setRecords(createDraftRecords(response.data.roster))
-    } catch (error) {
-      setRoster(null)
-      setRecords([])
-      setError(error instanceof Error ? error.message : 'Failed to load roster')
-    } finally {
-      setIsLoadingRoster(false)
-    }
-  }
+  const saveAttendanceMutation = useMutation({
+    mutationFn: async () => {
+      if (!effectiveSelectedClassId || !roster) {
+        throw new Error('Load a roster before saving attendance.')
+      }
 
-  async function saveAttendance() {
-    if (!selectedClassId || !roster) {
-      return
-    }
-
-    setError(null)
-    setIsSaving(true)
-
-    try {
       const token = await getToken()
 
       if (!token) {
-        setError('No Clerk session token was returned.')
-        return
+        throw new Error('No Clerk session token was returned.')
       }
 
-      await storeClassAttendance(token, selectedClassId, {
+      return storeClassAttendance(token, effectiveSelectedClassId, {
         attendance_date: attendanceDate,
         records: records.map((record) => ({
           student_user_id: record.student_user_id,
@@ -139,18 +111,59 @@ export function AttendanceTakingPanel({ onSaved }: AttendanceTakingPanelProps) {
           note: record.note.trim() || null,
         })),
       })
+    },
+    onSuccess: async () => {
+      if (!roster) {
+        return
+      }
 
       appToast.success('Attendance saved', `${roster.class.name} was updated.`)
 
+      await queryClient.invalidateQueries({
+        queryKey: queryKeys.attendanceRecords,
+      })
+
+      await queryClient.invalidateQueries({
+        queryKey: queryKeys.attendanceRoster(
+          effectiveSelectedClassId,
+          attendanceDate,
+        ),
+      })
+
       await loadRoster()
       await onSaved()
-    } catch (error) {
+    },
+    onError: (error) => {
       const message = error instanceof Error ? error.message : 'Failed to save attendance'
-      setError(message)
+
+      setActionError(message)
       appToast.error('Attendance was not saved', message)
-    } finally {
-      setIsSaving(false)
+    },
+  })
+
+  async function loadRoster() {
+    setActionError(null)
+
+    const result = await rosterQuery.refetch()
+
+    if (result.error) {
+      const message = result.error instanceof Error
+        ? result.error.message
+        : 'Failed to load roster'
+
+      setRoster(null)
+      setRecords([])
+      setActionError(message)
+
+      return
     }
+
+    if (!result.data) {
+      return
+    }
+
+    setRoster(result.data.data.roster)
+    setRecords(createDraftRecords(result.data.data.roster))
   }
 
   function updateRecord(
@@ -174,6 +187,10 @@ export function AttendanceTakingPanel({ onSaved }: AttendanceTakingPanelProps) {
       })),
     )
   }
+
+  const classesError = classesQuery.error instanceof Error
+    ? classesQuery.error.message
+    : 'Failed to load classes'
 
   return (
     <section className="space-y-4">
@@ -202,14 +219,15 @@ export function AttendanceTakingPanel({ onSaved }: AttendanceTakingPanelProps) {
 
               <select
                 className="mt-2 h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-700 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
-                disabled={isLoadingClasses || activeClasses.length === 0}
+                disabled={classesQuery.isLoading || activeClasses.length === 0}
                 id="attendance-class"
                 onChange={(event) => {
                   setSelectedClassId(Number(event.target.value))
                   setRoster(null)
                   setRecords([])
+                  setActionError(null)
                 }}
-                value={selectedClassId ?? ''}
+                value={effectiveSelectedClassId ?? ''}
               >
                 {activeClasses.length === 0 ? (
                   <option value="">No active classes</option>
@@ -235,6 +253,7 @@ export function AttendanceTakingPanel({ onSaved }: AttendanceTakingPanelProps) {
                   setAttendanceDate(event.target.value)
                   setRoster(null)
                   setRecords([])
+                  setActionError(null)
                 }}
                 type="date"
                 value={attendanceDate}
@@ -243,17 +262,23 @@ export function AttendanceTakingPanel({ onSaved }: AttendanceTakingPanelProps) {
 
             <Button
               className="w-full sm:w-auto"
-              disabled={!selectedClassId || isLoadingRoster}
-              onClick={loadRoster}
+              disabled={!effectiveSelectedClassId || rosterQuery.isFetching}
+              onClick={() => void loadRoster()}
             >
-              {isLoadingRoster ? 'Loading...' : 'Load roster'}
+              {rosterQuery.isFetching ? 'Loading...' : 'Load roster'}
             </Button>
           </div>
         </div>
 
-        {error ? (
+        {classesQuery.isError ? (
           <div className="mt-4 rounded-lg border border-red-100 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
-            {error}
+            {classesError}
+          </div>
+        ) : null}
+
+        {actionError ? (
+          <div className="mt-4 rounded-lg border border-red-100 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
+            {actionError}
           </div>
         ) : null}
       </Card>
@@ -295,10 +320,10 @@ export function AttendanceTakingPanel({ onSaved }: AttendanceTakingPanelProps) {
 
                 <Button
                   className="bg-emerald-500 text-white hover:bg-emerald-600"
-                  disabled={isSaving}
-                  onClick={saveAttendance}
+                  disabled={saveAttendanceMutation.isPending}
+                  onClick={() => saveAttendanceMutation.mutate()}
                 >
-                  {isSaving ? 'Saving...' : 'Save attendance'}
+                  {saveAttendanceMutation.isPending ? 'Saving...' : 'Save attendance'}
                 </Button>
               </div>
             </div>
