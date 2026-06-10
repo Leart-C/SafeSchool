@@ -82,12 +82,16 @@
 - [x] Backend class attendance save tests added
 - [x] Frontend attendance taking UI added
 - [x] Frontend attendance save feedback and roster refresh added
+- [x] Frontend TanStack Query provider added
+- [x] Authenticated profile migrated to TanStack Query
+- [x] Attendance records migrated to TanStack Query
 
 ## In Progress
 - [ ] Attendance branch verification and commit
 
 ## Up Next
 - [ ] Attendance permissions and role-based access
+- [ ] Migrate remaining frontend API pages to TanStack Query
 - [ ] Messaging foundation
 - [ ] Mobile Android dev-client verification
 
@@ -108,3 +112,4 @@
 | 2026-06-09 | Tailwind for frontend styling | Component-scoped utility classes are a better long-term fit than growing custom page CSS |
 | 2026-06-09 | React Router for frontend navigation | Product screens need direct URLs, refresh safety, and future nested routes |
 | 2026-06-09 | Thin API controllers with service-backed actions | Controllers should coordinate HTTP only; domain querying, mapping, and processing live in services |
+| 2026-06-10 | TanStack Query for frontend API state | Server state should use a dedicated cache/refetch layer instead of repeated useEffect/useState fetching |
