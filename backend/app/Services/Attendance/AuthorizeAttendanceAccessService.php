@@ -27,7 +27,7 @@ class AuthorizeAttendanceAccessService
             return false;
         }
 
-        if ($user->hasRole('admin')) {
+        if ($user->hasAnyRole(['admin', 'director'])) {
             return true;
         }
 
