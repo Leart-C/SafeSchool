@@ -5,3 +5,7 @@ export function hasAnyRole(userRoles: string[], allowedRoles: string[]): boolean
 export function canManageAttendance(userRoles: string[]): boolean {
   return hasAnyRole(userRoles, ['admin', 'teacher'])
 }
+
+export function canCreateMessages(userRoles: string[]): boolean {
+  return hasAnyRole(userRoles, ['admin', 'teacher'])
+}

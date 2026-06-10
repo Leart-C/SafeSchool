@@ -95,12 +95,17 @@
 - [x] Attendance backend role and class-scope access added
 - [x] Attendance role-access tests added
 - [x] Frontend attendance management UI hidden by role
+- [x] Backend messages table added
+- [x] Message model and audience enum added
+- [x] Backend message list/create endpoints added
+- [x] Backend message list/create tests added
 
 ## In Progress
-- [ ] Attendance role-access verification and commit
+- [ ] Messaging frontend foundation
 
 ## Up Next
-- [ ] Messaging foundation
+- [ ] Frontend messages service and screen
+- [ ] Message create form with role-aware UI
 - [ ] Mobile Android dev-client verification
 
 ## Decisions Log
