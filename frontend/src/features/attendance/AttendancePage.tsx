@@ -1,50 +1,37 @@
 import { useAuth } from '@clerk/clerk-react'
-import { useCallback, useEffect, useState } from 'react'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { EmptyState } from '../../components/EmptyState'
 import { Card } from '../../components/ui/Card'
-import {
-  getAttendanceRecords,
-  type AttendanceRecord,
-} from '../../services/attendanceService'
+import { getAttendanceRecords } from '../../services/attendanceService'
 import { AttendancePageHeader } from './AttendancePageHeader'
 import { AttendanceTable } from './AttendanceTable'
 import { AttendanceTakingPanel } from './AttendanceTakingPanel'
 
 export function AttendancePage() {
   const { getToken, isLoaded, isSignedIn } = useAuth()
-  const [records, setRecords] = useState<AttendanceRecord[]>([])
-  const [error, setError] = useState<string | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
+  const queryClient = useQueryClient()
 
-  const loadAttendanceRecords = useCallback(async () => {
-    if (!isLoaded || !isSignedIn) {
-      return
-    }
-
-    try {
+  const attendanceQuery = useQuery({
+    queryKey: ['attendance-records'],
+    enabled: isLoaded && isSignedIn,
+    queryFn: async () => {
       const token = await getToken()
 
       if (!token) {
-        setError('No Clerk session token was returned.')
-        return
+        throw new Error('No Clerk session token was returned.')
       }
 
-      setError(null)
-      const response = await getAttendanceRecords(token)
-      setRecords(response.data.attendance_records)
-    } catch (error) {
-      setError(error instanceof Error ? error.message : 'Failed to load attendance records')
-    } finally {
-      setIsLoading(false)
-    }
-  }, [getToken, isLoaded, isSignedIn])
+      return getAttendanceRecords(token)
+    },
+  })
 
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    void loadAttendanceRecords()
-  }, [loadAttendanceRecords])
+  async function refreshAttendanceRecords() {
+    await queryClient.invalidateQueries({
+      queryKey: ['attendance-records'],
+    })
+  }
 
-  if (isLoading) {
+  if (attendanceQuery.isLoading) {
     return (
       <Card>
         <p className="text-sm text-slate-600">Loading attendance records...</p>
@@ -52,25 +39,31 @@ export function AttendancePage() {
     )
   }
 
-  if (error) {
+  if (attendanceQuery.isError) {
     return (
       <section className="space-y-6">
         <AttendancePageHeader />
-        <AttendanceTakingPanel onSaved={loadAttendanceRecords} />
+        <AttendanceTakingPanel onSaved={refreshAttendanceRecords} />
 
         <EmptyState
           title="Could not load attendance"
-          description={error}
+          description={
+            attendanceQuery.error instanceof Error
+              ? attendanceQuery.error.message
+              : 'Failed to load attendance records'
+          }
         />
       </section>
     )
   }
 
+  const records = attendanceQuery.data?.data.attendance_records ?? []
+
   return (
     <section className="space-y-6">
       <AttendancePageHeader />
 
-      <AttendanceTakingPanel onSaved={loadAttendanceRecords} />
+      <AttendanceTakingPanel onSaved={refreshAttendanceRecords} />
 
       {records.length === 0 ? (
         <EmptyState

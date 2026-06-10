@@ -1,58 +1,47 @@
 import { useAuth } from '@clerk/clerk-react'
+import { useQuery } from '@tanstack/react-query'
 import { Outlet } from 'react-router-dom'
-import { useEffect, useState } from 'react'
 import { AppShell } from '../components/AppShell'
-import { getMe, type MeResponse } from '../services/meService'
+import { getMe } from '../services/meService'
 
 export function AuthenticatedLayout() {
   const { getToken, isLoaded, isSignedIn } = useAuth()
-  const [me, setMe] = useState<MeResponse | null>(null)
-  const [error, setError] = useState<string | null>(null)
 
-  useEffect(() => {
-    async function loadMe() {
-      if (!isLoaded || !isSignedIn) {
-        setMe(null)
-        return
+  const meQuery = useQuery({
+    queryKey: ['me'],
+    enabled: isLoaded && isSignedIn,
+    queryFn: async () => {
+      const token = await getToken()
+
+      if (!token) {
+        throw new Error('No Clerk session token was returned.')
       }
 
-      try {
-        const token = await getToken()
-
-        if (!token) {
-          setError('No Clerk session token was returned.')
-          return
-        }
-
-        setError(null)
-        setMe(await getMe(token))
-      } catch (error) {
-        setError(error instanceof Error ? error.message : 'Failed to load profile')
-      }
-    }
-
-    void loadMe()
-  }, [getToken, isLoaded, isSignedIn])
+      return getMe(token)
+    },
+  })
 
   if (!isLoaded) {
     return <main className="min-h-screen bg-slate-50 p-6">Loading SafeSchool...</main>
   }
 
-  if (error) {
+  if (meQuery.isError) {
     return (
       <main className="min-h-screen bg-slate-50 p-6">
-        <p className="text-sm font-medium text-red-700">{error}</p>
+        <p className="text-sm font-medium text-red-700">
+          {meQuery.error instanceof Error ? meQuery.error.message : 'Failed to load profile'}
+        </p>
       </main>
     )
   }
 
-  if (!me) {
+  if (meQuery.isLoading || !meQuery.data) {
     return <main className="min-h-screen bg-slate-50 p-6">Loading profile...</main>
   }
 
   return (
-    <AppShell user={me.data}>
-      <Outlet context={{ me }} />
+    <AppShell user={meQuery.data.data}>
+      <Outlet context={{ me: meQuery.data }} />
     </AppShell>
   )
 }
