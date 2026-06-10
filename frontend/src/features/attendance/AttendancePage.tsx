@@ -40,6 +40,7 @@ export function AttendancePage() {
   }, [getToken, isLoaded, isSignedIn])
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     void loadAttendanceRecords()
   }, [loadAttendanceRecords])
 
