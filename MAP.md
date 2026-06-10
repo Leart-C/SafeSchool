@@ -103,9 +103,14 @@
 - [x] Frontend messages list and create form added
 - [x] Frontend message creation gated by role
 - [x] Shared date formatter supports dates and timestamps
+- [x] Director role added to backend roles
+- [x] Director attendance and messaging permissions seeded
+- [x] Director attendance access added
+- [x] Director dashboard access added
+- [x] Director role access tests added
 
 ## In Progress
-- [ ] Messaging foundation verification and commit
+- [ ] Director role foundation verification and commit
 
 ## Up Next
 - [ ] Message edit/archive flow
