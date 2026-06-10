@@ -99,13 +99,16 @@
 - [x] Message model and audience enum added
 - [x] Backend message list/create endpoints added
 - [x] Backend message list/create tests added
+- [x] Frontend messages service connected to API
+- [x] Frontend messages list and create form added
+- [x] Frontend message creation gated by role
+- [x] Shared date formatter supports dates and timestamps
 
 ## In Progress
-- [ ] Messaging frontend foundation
+- [ ] Messaging foundation verification and commit
 
 ## Up Next
-- [ ] Frontend messages service and screen
-- [ ] Message create form with role-aware UI
+- [ ] Message edit/archive flow
 - [ ] Mobile Android dev-client verification
 
 ## Decisions Log
