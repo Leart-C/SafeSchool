@@ -43,9 +43,13 @@ export function AttendancePage() {
 
   if (attendanceQuery.isLoading) {
     return (
-      <Card>
-        <p className="text-sm text-slate-600">Loading attendance records...</p>
-      </Card>
+      <section className="space-y-6">
+        <AttendancePageHeader />
+
+        <Card>
+          <p className="text-sm text-slate-600">Loading attendance records...</p>
+        </Card>
+      </section>
     )
   }
 

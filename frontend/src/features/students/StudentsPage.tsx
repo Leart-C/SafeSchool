@@ -2,12 +2,10 @@ import { useAuth } from '@clerk/clerk-react'
 import { useQuery } from '@tanstack/react-query'
 import { EmptyState } from '../../components/EmptyState'
 import { Card } from '../../components/ui/Card'
+import { queryKeys } from '../../lib/queryKeys'
 import { getStudents } from '../../services/studentService'
 import { StudentsPageHeader } from './StudentsPageHeader'
 import { StudentsTable } from './StudentsTable'
-import { queryKeys } from '../../lib/queryKeys'
-
-
 
 export function StudentsPage() {
   const { getToken, isLoaded, isSignedIn } = useAuth()
@@ -51,10 +49,14 @@ export function StudentsPage() {
 
   if (students.length === 0) {
     return (
-      <EmptyState
-        title="No students yet"
-        description="Student accounts linked to your school will appear here."
-      />
+      <section className="space-y-6">
+        <StudentsPageHeader />
+
+        <EmptyState
+          title="No students yet"
+          description="Student accounts linked to your school will appear here."
+        />
+      </section>
     )
   }
 

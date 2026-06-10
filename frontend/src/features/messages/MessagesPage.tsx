@@ -1,5 +1,6 @@
 import { useAuth } from '@clerk/clerk-react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { Plus } from 'lucide-react'
 import { useState } from 'react'
 import { useOutletContext } from 'react-router-dom'
 import { EmptyState } from '../../components/EmptyState'
@@ -201,22 +202,30 @@ export function MessagesPage() {
 
   if (messagesQuery.isLoading) {
     return (
-      <Card>
-        <p className="text-sm text-slate-600">Loading messages...</p>
-      </Card>
+      <section className="space-y-6">
+        <MessagesPageHeader />
+
+        <Card>
+          <p className="text-sm text-slate-600">Loading messages...</p>
+        </Card>
+      </section>
     )
   }
 
   if (messagesQuery.isError) {
     return (
-      <EmptyState
-        title="Could not load messages"
-        description={
-          messagesQuery.error instanceof Error
-            ? messagesQuery.error.message
-            : 'Failed to load messages'
-        }
-      />
+      <section className="space-y-6">
+        <MessagesPageHeader />
+
+        <EmptyState
+          title="Could not load messages"
+          description={
+            messagesQuery.error instanceof Error
+              ? messagesQuery.error.message
+              : 'Failed to load messages'
+          }
+        />
+      </section>
     )
   }
 
@@ -230,6 +239,7 @@ export function MessagesPage() {
 
         {canCreate ? (
           <Button
+            icon={<Plus className="h-4 w-4" aria-hidden={true} />}
             onClick={() => {
               if (isFormOpen) {
                 resetForm()
@@ -262,7 +272,10 @@ export function MessagesPage() {
           description="School announcements and class updates will appear here."
           action={
             canCreate ? (
-              <Button onClick={() => setIsFormOpen(true)}>
+              <Button
+                icon={<Plus className="h-4 w-4" aria-hidden={true} />}
+                onClick={() => setIsFormOpen(true)}
+              >
                 Create message
               </Button>
             ) : undefined

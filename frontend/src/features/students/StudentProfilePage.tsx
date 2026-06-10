@@ -4,12 +4,12 @@ import { Link, useParams } from 'react-router-dom'
 import { EmptyState } from '../../components/EmptyState'
 import { Button } from '../../components/ui/Button'
 import { Card } from '../../components/ui/Card'
+import { queryKeys } from '../../lib/queryKeys'
 import { getStudent } from '../../services/studentService'
 import { StudentClassesPanel } from './StudentClassesPanel'
 import { StudentGuardiansPanel } from './StudentGuardiansPanel'
 import { StudentProfileHeader } from './StudentProfileHeader'
 import { StudentSummaryCards } from './StudentSummaryCards'
-import { queryKeys } from '../../lib/queryKeys'
 
 export function StudentProfilePage() {
   const { studentId } = useParams()
@@ -51,9 +51,9 @@ export function StudentProfilePage() {
             : 'Failed to load student'
         }
         action={
-          <Link to="/app/students">
-            <Button variant="secondary">Back to students</Button>
-          </Link>
+          <Button as={Link} to="/app/students" variant="secondary">
+            Back to students
+          </Button>
         }
       />
     )
@@ -67,9 +67,9 @@ export function StudentProfilePage() {
         title="Student not found"
         description="This student could not be found in your school workspace."
         action={
-          <Link to="/app/students">
-            <Button variant="secondary">Back to students</Button>
-          </Link>
+          <Button as={Link} to="/app/students" variant="secondary">
+            Back to students
+          </Button>
         }
       />
     )

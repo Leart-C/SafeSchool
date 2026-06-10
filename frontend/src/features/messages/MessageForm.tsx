@@ -1,5 +1,9 @@
+import { SendHorizontal } from 'lucide-react'
 import { Button } from '../../components/ui/Button'
 import { Card } from '../../components/ui/Card'
+import { Input } from '../../components/ui/Input'
+import { Select } from '../../components/ui/Select'
+import { Textarea } from '../../components/ui/Textarea'
 import type {
   CreateMessagePayload,
   MessageAudience,
@@ -37,20 +41,29 @@ export function MessageForm({
   return (
     <Card>
       <form
-        className="space-y-4"
+        className="space-y-5"
         onSubmit={(event) => {
           event.preventDefault()
           onSubmit()
         }}
       >
+        <div>
+          <h3 className="text-base font-semibold text-slate-950">
+            Message details
+          </h3>
+          <p className="mt-1 text-sm text-slate-500">
+            Choose who should see the message, then write a clear announcement.
+          </p>
+        </div>
+
         <div className="grid gap-4 lg:grid-cols-[220px_1fr]">
           <div>
             <label className="text-sm font-medium text-slate-700" htmlFor="message-audience">
               Audience
             </label>
 
-            <select
-              className="mt-2 h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-700 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
+            <Select
+              className="mt-2"
               id="message-audience"
               onChange={(event) =>
                 onChange({
@@ -66,7 +79,7 @@ export function MessageForm({
                   {audience.label}
                 </option>
               ))}
-            </select>
+            </Select>
           </div>
 
           <div>
@@ -74,8 +87,8 @@ export function MessageForm({
               Title
             </label>
 
-            <input
-              className="mt-2 h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
+            <Input
+              className="mt-2"
               id="message-title"
               onChange={(event) =>
                 onChange({
@@ -95,8 +108,8 @@ export function MessageForm({
             Message
           </label>
 
-          <textarea
-            className="mt-2 min-h-36 w-full rounded-lg border border-slate-200 bg-white px-3 py-3 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
+          <Textarea
+            className="mt-2 min-h-36"
             id="message-body"
             onChange={(event) =>
               onChange({
@@ -110,10 +123,10 @@ export function MessageForm({
           />
         </div>
 
-        <label className="flex items-center gap-2 text-sm font-medium text-slate-700">
+        <label className="flex items-start gap-3 rounded-lg border border-slate-200 bg-slate-50 p-4">
           <input
             checked={form.publish_now}
-            className="h-4 w-4 rounded border-slate-300"
+            className="mt-1 h-4 w-4 rounded border-slate-300"
             onChange={(event) =>
               onChange({
                 ...form,
@@ -122,20 +135,25 @@ export function MessageForm({
             }
             type="checkbox"
           />
-          Publish now
+
+          <span>
+            <span className="flex items-center gap-2 text-sm font-medium text-slate-900">
+              <SendHorizontal className="h-4 w-4 text-emerald-600" aria-hidden={true} />
+              Publish now
+            </span>
+            <span className="mt-1 block text-sm leading-6 text-slate-500">
+              Published messages appear immediately in the active message list.
+            </span>
+          </span>
         </label>
 
         {error ? (
-          <p className="text-sm font-medium text-red-700">
+          <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
             {error}
-          </p>
+          </div>
         ) : null}
 
-        <div className="flex flex-wrap gap-3">
-          <Button disabled={isSubmitting} type="submit">
-            {isSubmitting ? 'Saving...' : submitLabel}
-          </Button>
-
+        <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
           <Button
             disabled={isSubmitting}
             onClick={onCancel}
@@ -143,6 +161,10 @@ export function MessageForm({
             variant="secondary"
           >
             Cancel
+          </Button>
+
+          <Button disabled={isSubmitting} type="submit">
+            {isSubmitting ? 'Saving...' : submitLabel}
           </Button>
         </div>
       </form>

@@ -1,6 +1,17 @@
 import { UserButton } from '@clerk/clerk-react'
-import { NavLink } from 'react-router-dom'
 import type { ReactNode } from 'react'
+import { NavLink } from 'react-router-dom'
+import {
+  Bell,
+  BookOpen,
+  CalendarCheck,
+  GraduationCap,
+  LayoutDashboard,
+  MessageSquareText,
+  School,
+  Users,
+} from 'lucide-react'
+import { cn } from '../lib/utils'
 import { Badge } from './ui/Badge'
 
 type AppShellProps = {
@@ -16,73 +27,150 @@ type AppShellProps = {
 }
 
 const navigationItems = [
-  { label: 'Dashboard', to: '/app/dashboard' },
-  { label: 'Classes', to: '/app/classes' },
-  { label: 'Students', to: '/app/students' },
-  { label: 'Attendance', to: '/app/attendance' },
-  { label: 'Messages', to: '/app/messages' },
+  {
+    label: 'Dashboard',
+    to: '/app/dashboard',
+    icon: LayoutDashboard,
+  },
+  {
+    label: 'Classes',
+    to: '/app/classes',
+    icon: BookOpen,
+  },
+  {
+    label: 'Students',
+    to: '/app/students',
+    icon: GraduationCap,
+  },
+  {
+    label: 'Attendance',
+    to: '/app/attendance',
+    icon: CalendarCheck,
+  },
+  {
+    label: 'Messages',
+    to: '/app/messages',
+    icon: MessageSquareText,
+  },
 ]
 
 export function AppShell({ user, children }: AppShellProps) {
+  const primaryRole = user.roles[0] ?? 'No role'
+
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-950 lg:grid lg:grid-cols-[280px_1fr]">
-      <aside className="border-b border-slate-200 bg-white px-5 py-4 lg:min-h-screen lg:border-b-0 lg:border-r">
-        <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-emerald-600 text-sm font-bold text-white">
-            S
+    <div className="min-h-screen bg-slate-100 text-slate-950 lg:grid lg:grid-cols-[280px_1fr]">
+      <aside className="border-b border-slate-200 bg-white lg:min-h-screen lg:border-b-0 lg:border-r">
+        <div className="flex h-full flex-col">
+          <div className="border-b border-slate-100 px-5 py-5">
+            <div className="flex items-center gap-3">
+              <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-slate-950 text-white shadow-sm">
+                <School className="h-5 w-5" aria-hidden="true" />
+              </div>
+
+              <div className="min-w-0">
+                <strong className="block truncate text-sm font-semibold text-slate-950">
+                  SafeSchool
+                </strong>
+                <span className="block truncate text-xs text-slate-500">
+                  {user.school?.name ?? 'No school assigned'}
+                </span>
+              </div>
+            </div>
           </div>
 
-          <div>
-            <strong className="block text-sm font-semibold text-slate-950">
-              SafeSchool
-            </strong>
-            <span className="block text-xs text-slate-500">
-              {user.school?.name ?? 'No school assigned'}
-            </span>
+          <nav
+            aria-label="Main navigation"
+            className="flex gap-1 overflow-x-auto px-4 py-4 lg:flex-col lg:overflow-visible"
+          >
+            {navigationItems.map((item) => {
+              const Icon = item.icon
+
+              return (
+                <NavLink
+                  className={({ isActive }) =>
+                    cn(
+                      'inline-flex min-h-10 items-center gap-3 rounded-md px-3 text-sm font-medium transition',
+                      'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2',
+                      isActive
+                        ? 'bg-slate-950 text-white shadow-sm'
+                        : 'text-slate-600 hover:bg-slate-100 hover:text-slate-950',
+                    )
+                  }
+                  key={item.to}
+                  to={item.to}
+                >
+                  <Icon className="h-4 w-4 shrink-0" aria-hidden="true" />
+                  <span>{item.label}</span>
+                </NavLink>
+              )
+            })}
+          </nav>
+
+          <div className="mt-auto hidden border-t border-slate-100 px-5 py-5 lg:block">
+            <div className="rounded-lg bg-slate-50 p-4">
+              <div className="flex items-center gap-2 text-xs font-medium uppercase tracking-wide text-slate-500">
+                <Users className="h-3.5 w-3.5" aria-hidden="true" />
+                Workspace
+              </div>
+
+              <p className="mt-2 text-sm font-medium text-slate-950">
+                {primaryRole}
+              </p>
+
+              <p className="mt-1 text-xs leading-5 text-slate-500">
+                Access is scoped by school role and backend permissions.
+              </p>
+            </div>
           </div>
         </div>
-
-        <nav className="mt-8 flex gap-1 overflow-x-auto lg:flex-col" aria-label="Main navigation">
-          {navigationItems.map((item) => (
-            <NavLink
-              className={({ isActive }) =>
-                `rounded-lg px-3 py-2 text-sm font-medium transition ${
-                  isActive
-                    ? 'bg-slate-950 text-white'
-                    : 'text-slate-600 hover:bg-slate-100 hover:text-slate-950'
-                }`
-              }
-              key={item.to}
-              to={item.to}
-            >
-              {item.label}
-            </NavLink>
-          ))}
-        </nav>
       </aside>
 
       <div className="min-w-0">
-        <header className="flex items-center justify-between gap-4 border-b border-slate-200 bg-white px-6 py-4">
-          <div className="min-w-0">
-            <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
-              Signed in as
-            </p>
-            <h1 className="truncate text-xl font-semibold text-slate-950">
-              {user.name}
-            </h1>
-          </div>
+        <header className="sticky top-0 z-10 border-b border-slate-200 bg-white/95 px-5 py-4 backdrop-blur">
+          <div className="flex items-center justify-between gap-4">
+            <div className="min-w-0">
+              <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
+                Signed in as
+              </p>
 
-          <div className="flex items-center gap-3">
-            {user.roles.length > 0 ? (
-              user.roles.map((role) => <Badge key={role}>{role}</Badge>)
-            ) : (
-              <Badge>No role</Badge>
-            )}
-            <UserButton />
+              <h1 className="truncate text-xl font-semibold text-slate-950">
+                {user.name}
+              </h1>
+
+              <p className="mt-0.5 truncate text-sm text-slate-500">
+                {user.email}
+              </p>
+            </div>
+
+            <div className="flex items-center gap-3">
+              <button
+                aria-label="Notifications"
+                className="hidden h-9 w-9 items-center justify-center rounded-md border border-slate-200 bg-white text-slate-500 transition hover:bg-slate-50 hover:text-slate-950 sm:inline-flex"
+                type="button"
+              >
+                <Bell className="h-4 w-4" aria-hidden="true" />
+              </button>
+
+              <div className="hidden items-center gap-2 md:flex">
+                {user.roles.length > 0 ? (
+                  user.roles.map((role) => (
+                    <Badge key={role} variant="default">
+                      {role}
+                    </Badge>
+                  ))
+                ) : (
+                  <Badge variant="muted">No role</Badge>
+                )}
+              </div>
+
+              <UserButton />
+            </div>
           </div>
         </header>
 
-        <main className="px-6 py-6">{children}</main>
+        <main className="mx-auto w-full max-w-7xl px-5 py-6 lg:px-8">
+          {children}
+        </main>
       </div>
     </div>
   )

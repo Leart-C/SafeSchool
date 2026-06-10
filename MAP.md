@@ -113,12 +113,17 @@
 - [x] Backend archived messages hidden from active list
 - [x] Backend message lifecycle tests added
 - [x] Frontend message edit/archive actions added
+- [x] Frontend UI helper and base UI primitives refreshed
+- [x] Frontend app shell and dashboard UI refreshed
+- [x] Frontend classes UI refreshed
+- [x] Frontend students list and profile UI refreshed
+- [x] Frontend attendance UI refreshed
+- [x] Frontend messages UI refreshed
 
 ## In Progress
-- [ ] Message edit/archive verification and commit
+- [ ] Frontend UI refresh branch verification and commit
 
 ## Up Next
-- [ ] Frontend UI system/template foundation
 - [ ] Mobile Android dev-client verification
 
 ## Decisions Log
