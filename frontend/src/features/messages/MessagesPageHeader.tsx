@@ -1,18 +1,19 @@
+import { MessageSquareText } from 'lucide-react'
+import { PageHeader } from '../../components/PageHeader'
+import { Badge } from '../../components/ui/Badge'
+
 export function MessagesPageHeader() {
   return (
-    <div>
-      <p className="text-sm font-medium uppercase tracking-wide text-emerald-700">
-        Communication
-      </p>
-
-      <h2 className="mt-2 text-2xl font-semibold text-slate-950">
-        Messages
-      </h2>
-
-      <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">
-        Share school announcements and class updates. Messages stay available
-        in SafeSchool even when future email or push delivery is added.
-      </p>
-    </div>
+    <PageHeader
+      action={
+        <Badge variant="muted">
+          <MessageSquareText className="mr-1.5 h-3.5 w-3.5" aria-hidden={true} />
+          Announcements
+        </Badge>
+      }
+      description="Share school announcements and class updates. Messages stay available in SafeSchool even when future email or push delivery is added."
+      eyebrow="Communication"
+      title="Messages"
+    />
   )
 }

@@ -1,4 +1,6 @@
 import type { AttendanceStatus } from '../../services/attendanceService'
+import { Select } from '../../components/ui/Select'
+import { cn } from '../../lib/utils'
 
 type AttendanceStatusSelectProps = {
   value: AttendanceStatus
@@ -27,8 +29,11 @@ export function AttendanceStatusSelect({
   onChange,
 }: AttendanceStatusSelectProps) {
   return (
-    <select
-      className={`h-10 w-36 rounded-lg border px-3 text-sm font-semibold outline-none transition focus:ring-2 focus:ring-slate-200 ${statusClasses[value]}`}
+    <Select
+      className={cn(
+        'w-36 font-semibold',
+        statusClasses[value],
+      )}
       onChange={(event) => onChange(event.target.value as AttendanceStatus)}
       value={value}
     >
@@ -37,6 +42,6 @@ export function AttendanceStatusSelect({
           {status.label}
         </option>
       ))}
-    </select>
+    </Select>
   )
 }

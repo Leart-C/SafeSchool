@@ -1,18 +1,27 @@
 import { useAuth } from '@clerk/clerk-react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import {
+  CalendarCheck,
+  CheckCheck,
+  ClipboardList,
+  Save,
+  XCircle,
+} from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { Button } from '../../components/ui/Button'
 import { Card } from '../../components/ui/Card'
+import { Input } from '../../components/ui/Input'
+import { Select } from '../../components/ui/Select'
 import { formatDisplayDate } from '../../lib/date'
-import { appToast } from '../../lib/toast'
-import { getClasses } from '../../services/classService'
 import { queryKeys } from '../../lib/queryKeys'
+import { appToast } from '../../lib/toast'
 import {
   getClassAttendanceRoster,
   storeClassAttendance,
   type AttendanceRoster,
   type AttendanceStatus,
 } from '../../services/attendanceService'
+import { getClasses } from '../../services/classService'
 import {
   AttendanceRosterTable,
   type AttendanceDraftRecord,
@@ -194,14 +203,17 @@ export function AttendanceTakingPanel({ onSaved }: AttendanceTakingPanelProps) {
 
   return (
     <section className="space-y-4">
-      <Card className="border-slate-200 bg-white">
+      <Card>
         <div className="grid gap-5 xl:grid-cols-[1fr_auto] xl:items-end">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wide text-emerald-700">
-              Daily attendance
-            </p>
+            <div className="flex items-center gap-2">
+              <CalendarCheck className="h-4 w-4 text-emerald-700" aria-hidden={true} />
+              <p className="text-xs font-semibold uppercase tracking-wide text-emerald-700">
+                Daily attendance
+              </p>
+            </div>
 
-            <h3 className="mt-1 text-lg font-semibold text-slate-950">
+            <h3 className="mt-2 text-lg font-semibold text-slate-950">
               Take attendance
             </h3>
 
@@ -217,8 +229,8 @@ export function AttendanceTakingPanel({ onSaved }: AttendanceTakingPanelProps) {
                 Class
               </label>
 
-              <select
-                className="mt-2 h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-700 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
+              <Select
+                className="mt-2"
                 disabled={classesQuery.isLoading || activeClasses.length === 0}
                 id="attendance-class"
                 onChange={(event) => {
@@ -238,7 +250,7 @@ export function AttendanceTakingPanel({ onSaved }: AttendanceTakingPanelProps) {
                     {schoolClass.name}
                   </option>
                 ))}
-              </select>
+              </Select>
             </div>
 
             <div>
@@ -246,8 +258,8 @@ export function AttendanceTakingPanel({ onSaved }: AttendanceTakingPanelProps) {
                 Date
               </label>
 
-              <input
-                className="mt-2 h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-700 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
+              <Input
+                className="mt-2"
                 id="attendance-date"
                 onChange={(event) => {
                   setAttendanceDate(event.target.value)
@@ -263,6 +275,7 @@ export function AttendanceTakingPanel({ onSaved }: AttendanceTakingPanelProps) {
             <Button
               className="w-full sm:w-auto"
               disabled={!effectiveSelectedClassId || rosterQuery.isFetching}
+              icon={<ClipboardList className="h-4 w-4" aria-hidden={true} />}
               onClick={() => void loadRoster()}
             >
               {rosterQuery.isFetching ? 'Loading...' : 'Load roster'}
@@ -285,7 +298,7 @@ export function AttendanceTakingPanel({ onSaved }: AttendanceTakingPanelProps) {
 
       {roster ? (
         <div className="space-y-4">
-          <Card className="bg-slate-950 text-white">
+          <Card className="border-slate-900 bg-slate-950 text-white">
             <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
               <div>
                 <p className="text-xs font-semibold uppercase tracking-wide text-emerald-300">
@@ -303,7 +316,7 @@ export function AttendanceTakingPanel({ onSaved }: AttendanceTakingPanelProps) {
 
               <div className="flex flex-wrap gap-2">
                 <Button
-                  className="bg-white text-slate-950 hover:bg-slate-100"
+                  icon={<CheckCheck className="h-4 w-4" aria-hidden={true} />}
                   onClick={() => markAll('present')}
                   variant="secondary"
                 >
@@ -311,7 +324,7 @@ export function AttendanceTakingPanel({ onSaved }: AttendanceTakingPanelProps) {
                 </Button>
 
                 <Button
-                  className="bg-white text-slate-950 hover:bg-slate-100"
+                  icon={<XCircle className="h-4 w-4" aria-hidden={true} />}
                   onClick={() => markAll('absent')}
                   variant="secondary"
                 >
@@ -321,6 +334,7 @@ export function AttendanceTakingPanel({ onSaved }: AttendanceTakingPanelProps) {
                 <Button
                   className="bg-emerald-500 text-white hover:bg-emerald-600"
                   disabled={saveAttendanceMutation.isPending}
+                  icon={<Save className="h-4 w-4" aria-hidden={true} />}
                   onClick={() => saveAttendanceMutation.mutate()}
                 >
                   {saveAttendanceMutation.isPending ? 'Saving...' : 'Save attendance'}

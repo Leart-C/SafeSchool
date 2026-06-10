@@ -1,11 +1,13 @@
 import { useAuth } from '@clerk/clerk-react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { Plus } from 'lucide-react'
 import { useState } from 'react'
 import { EmptyState } from '../../components/EmptyState'
+import { PageHeader } from '../../components/PageHeader'
 import { Button } from '../../components/ui/Button'
 import { Card } from '../../components/ui/Card'
-import { appToast } from '../../lib/toast'
 import { queryKeys } from '../../lib/queryKeys'
+import { appToast } from '../../lib/toast'
 import {
   createClass,
   getClasses,
@@ -15,8 +17,6 @@ import {
 } from '../../services/classService'
 import { ClassForm } from './ClassForm'
 import { ClassesTable } from './ClassesTable'
-
-
 
 const initialForm: CreateClassPayload = {
   name: '',
@@ -128,6 +128,22 @@ export function ClassesPage() {
     setIsCreateOpen(false)
   }
 
+  function openCreateForm() {
+    setForm(initialForm)
+    setEditingClass(null)
+    setFormError(null)
+    setIsCreateOpen(true)
+  }
+
+  function toggleForm() {
+    if (isCreateOpen) {
+      resetForm()
+      return
+    }
+
+    openCreateForm()
+  }
+
   function submitClassForm() {
     setFormError(null)
 
@@ -196,35 +212,19 @@ export function ClassesPage() {
 
   return (
     <section className="space-y-6">
-      <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-        <div>
-          <p className="text-sm font-medium uppercase tracking-wide text-emerald-700">
-            School classes
-          </p>
-
-          <h2 className="mt-2 text-2xl font-semibold text-slate-950">
-            Classes
-          </h2>
-
-          <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">
-            Review and manage classes scoped to your school. Archived classes
-            stay available for history and reporting.
-          </p>
-        </div>
-
-        <Button
-          onClick={() => {
-            if (isCreateOpen) {
-              resetForm()
-              return
-            }
-
-            setIsCreateOpen(true)
-          }}
-        >
-          {isCreateOpen ? 'Close form' : 'Create class'}
-        </Button>
-      </div>
+      <PageHeader
+        action={
+          <Button
+            icon={<Plus className="h-4 w-4" aria-hidden={true} />}
+            onClick={toggleForm}
+          >
+            {isCreateOpen ? 'Close form' : 'Create class'}
+          </Button>
+        }
+        description="Review and manage classes scoped to your school. Archived classes stay available for history and reporting."
+        eyebrow="School classes"
+        title="Classes"
+      />
 
       {isCreateOpen ? (
         <ClassForm
@@ -243,7 +243,10 @@ export function ClassesPage() {
           title="No classes yet"
           description="Create your first class to start organizing teachers and students."
           action={
-            <Button onClick={() => setIsCreateOpen(true)}>
+            <Button
+              icon={<Plus className="h-4 w-4" aria-hidden={true} />}
+              onClick={openCreateForm}
+            >
               Create class
             </Button>
           }
