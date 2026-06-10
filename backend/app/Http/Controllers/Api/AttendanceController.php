@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Requests\ClassAttendanceRosterRequest;
 use App\Http\Requests\StoreClassAttendanceRequest;
 use App\Models\SchoolClass;
+use App\Services\Attendance\AuthorizeAttendanceAccessService;
 use App\Services\Attendance\GetClassAttendanceRosterService;
 use App\Services\Attendance\ListAttendanceRecordsService;
 use App\Services\Attendance\StoreClassAttendanceService;
@@ -15,13 +16,21 @@ class AttendanceController extends ApiController
 {
     public function index(
         Request $request,
-        ListAttendanceRecordsService $attendanceRecords
+        ListAttendanceRecordsService $attendanceRecords,
+        AuthorizeAttendanceAccessService $attendanceAccess
     ): JsonResponse {
         $user = $request->user();
 
         if (! $user->school_id) {
             return $this->error(
                 'Authenticated user is not assigned to a school.',
+                status: 403,
+            );
+        }
+
+        if (! $attendanceAccess->canViewSchoolAttendance($user)) {
+            return $this->error(
+                'You are not allowed to view school attendance.',
                 status: 403,
             );
         }
@@ -34,13 +43,21 @@ class AttendanceController extends ApiController
     public function roster(
         ClassAttendanceRosterRequest $request,
         SchoolClass $class,
-        GetClassAttendanceRosterService $attendanceRoster
+        GetClassAttendanceRosterService $attendanceRoster,
+        AuthorizeAttendanceAccessService $attendanceAccess
     ): JsonResponse {
         $user = $request->user();
 
-        if (! $user->school_id) {
+        if ($class->school_id !== $user->school_id) {
             return $this->error(
-                'Authenticated user is not assigned to a school.',
+                'Class was not found for this school.',
+                status: 404,
+            );
+        }
+
+        if (! $attendanceAccess->canViewClassAttendanceRoster($user, $class)) {
+            return $this->error(
+                'You are not allowed to view this attendance roster.',
                 status: 403,
             );
         }
@@ -66,13 +83,21 @@ class AttendanceController extends ApiController
     public function storeClassAttendance(
         StoreClassAttendanceRequest $request,
         SchoolClass $class,
-        StoreClassAttendanceService $attendance
+        StoreClassAttendanceService $attendance,
+        AuthorizeAttendanceAccessService $attendanceAccess
     ): JsonResponse {
         $user = $request->user();
 
-        if (! $user->school_id) {
+        if ($class->school_id !== $user->school_id) {
             return $this->error(
-                'Authenticated user is not assigned to a school.',
+                'Class was not found for this school.',
+                status: 404,
+            );
+        }
+
+        if (! $attendanceAccess->canManageClassAttendance($user, $class)) {
+            return $this->error(
+                'You are not allowed to manage attendance for this class.',
                 status: 403,
             );
         }

@@ -1,16 +1,25 @@
 import { useAuth } from '@clerk/clerk-react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { useOutletContext } from 'react-router-dom'
 import { EmptyState } from '../../components/EmptyState'
 import { Card } from '../../components/ui/Card'
+import { canManageAttendance } from '../../lib/roles'
+import { queryKeys } from '../../lib/queryKeys'
 import { getAttendanceRecords } from '../../services/attendanceService'
+import type { MeResponse } from '../../services/meService'
 import { AttendancePageHeader } from './AttendancePageHeader'
 import { AttendanceTable } from './AttendanceTable'
 import { AttendanceTakingPanel } from './AttendanceTakingPanel'
-import { queryKeys } from '../../lib/queryKeys'
+
+type AuthenticatedOutletContext = {
+  me: MeResponse
+}
 
 export function AttendancePage() {
+  const { me } = useOutletContext<AuthenticatedOutletContext>()
   const { getToken, isLoaded, isSignedIn } = useAuth()
   const queryClient = useQueryClient()
+  const canManage = canManageAttendance(me.data.roles)
 
   const attendanceQuery = useQuery({
     queryKey: queryKeys.attendanceRecords,
@@ -44,7 +53,15 @@ export function AttendancePage() {
     return (
       <section className="space-y-6">
         <AttendancePageHeader />
-        <AttendanceTakingPanel onSaved={refreshAttendanceRecords} />
+
+        {canManage ? (
+          <AttendanceTakingPanel onSaved={refreshAttendanceRecords} />
+        ) : (
+          <EmptyState
+            title="Attendance management unavailable"
+            description="Your role can view personal attendance information later, but cannot manage school attendance."
+          />
+        )}
 
         <EmptyState
           title="Could not load attendance"
@@ -64,7 +81,14 @@ export function AttendancePage() {
     <section className="space-y-6">
       <AttendancePageHeader />
 
-      <AttendanceTakingPanel onSaved={refreshAttendanceRecords} />
+      {canManage ? (
+        <AttendanceTakingPanel onSaved={refreshAttendanceRecords} />
+      ) : (
+        <EmptyState
+          title="Attendance management unavailable"
+          description="Your role can view personal attendance information later, but cannot manage school attendance."
+        />
+      )}
 
       {records.length === 0 ? (
         <EmptyState

@@ -7,6 +7,7 @@ use App\Models\AttendanceRecord;
 use App\Models\School;
 use App\Models\SchoolClass;
 use App\Models\User;
+use Database\Seeders\RoleSeeder;
 use Firebase\JWT\JWT;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -42,6 +43,8 @@ class AttendanceIndexTest extends TestCase
             'clerk.jwt_audience' => 'safeschool-api',
             'clerk.jwt_authorized_parties' => ['http://localhost:5173'],
         ]);
+
+        $this->seed(RoleSeeder::class);
     }
 
     public function test_it_lists_attendance_records_for_the_authenticated_users_school(): void
@@ -65,6 +68,7 @@ class AttendanceIndexTest extends TestCase
             'clerk_user_id' => 'user_123',
             'name' => 'Admin User',
         ]);
+        $admin->assignRole('admin');
 
         $student = User::factory()->create([
             'school_id' => $school->id,
@@ -163,6 +167,7 @@ class AttendanceIndexTest extends TestCase
             'school_id' => null,
             'clerk_user_id' => 'user_123',
         ]);
+        $admin->assignRole('admin');
 
         $this
             ->withToken($this->tokenFor($admin->clerk_user_id))
