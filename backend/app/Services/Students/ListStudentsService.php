@@ -7,6 +7,10 @@ use Illuminate\Support\Collection;
 
 class ListStudentsService
 {
+    public function __construct(
+        private readonly StudentProfileData $studentProfileData
+    ) {}
+
     /**
      * @return Collection<int, array<string, mixed>>
      */
@@ -15,6 +19,7 @@ class ListStudentsService
         return User::query()
             ->where('school_id', $schoolId)
             ->role('student')
+            ->with(['studentProfile'])
             ->withCount([
                 'guardians',
                 'enrolledClasses',
@@ -29,6 +34,7 @@ class ListStudentsService
                 'last_name' => $student->last_name,
                 'email' => $student->email,
                 'avatar_url' => $student->avatar_url,
+                'profile' => $this->studentProfileData->fromProfile($student->studentProfile),
                 'guardians_count' => $student->guardians_count,
                 'classes_count' => $student->enrolled_classes_count,
             ])

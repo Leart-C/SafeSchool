@@ -132,11 +132,17 @@
 - [x] Backend class profile and membership tests added
 - [x] Frontend class profile route added
 - [x] Frontend class membership management UI added
+- [x] Backend student profiles table added
+- [x] Backend official student registration endpoint added
+- [x] Backend student registration tests added
+- [x] Frontend student registration form added
+- [x] Frontend official student profile details added
 
 ## In Progress
-- [ ] Class membership branch verification and commit
+- [ ] Student registration branch verification and commit
 
 ## Up Next
+- [ ] Guardian registration and student linking
 - [ ] Mobile Android dev-client verification
 
 ## Decisions Log

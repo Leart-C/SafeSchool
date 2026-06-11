@@ -21,7 +21,11 @@ export function StudentProfileHeader({ student }: StudentProfileHeaderProps) {
           Back to students
         </Button>
       }
-      description={student.email}
+      description={
+      student.profile
+          ? `${student.email} · ${student.profile.student_code}`
+          : student.email
+      }
       eyebrow="Student profile"
       title={student.name}
     />

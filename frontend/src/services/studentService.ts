@@ -1,4 +1,4 @@
-import { apiGet } from './api'
+import { apiGet, apiPost } from './api'
 
 export type Student = {
   id: number
@@ -7,6 +7,7 @@ export type Student = {
   last_name: string | null
   email: string
   avatar_url: string | null
+  profile: StudentOfficialProfile | null
   guardians_count: number
   classes_count: number
 }
@@ -60,4 +61,38 @@ export function getStudent(
   studentId: string,
 ): Promise<StudentResponse> {
   return apiGet<StudentResponse>(`/students/${studentId}`, token)
+}
+
+export type StudentOfficialProfile = {
+  id: number
+  student_code: string
+  date_of_birth: string | null
+  grade_level: string | null
+  enrollment_status: string
+  notes: string | null
+}
+
+export type CreateStudentPayload = {
+  first_name: string
+  last_name: string
+  email?: string
+  student_code?: string
+  date_of_birth?: string
+  grade_level: string
+  enrollment_status?: string
+  notes?: string
+}
+
+export type CreateStudentResponse = {
+  data: {
+    student: Student
+  }
+  message: string
+}
+
+export function createStudent(
+  token: string,
+  payload: CreateStudentPayload,
+): Promise<CreateStudentResponse> {
+  return apiPost<CreateStudentResponse>('/students', token, payload)
 }
