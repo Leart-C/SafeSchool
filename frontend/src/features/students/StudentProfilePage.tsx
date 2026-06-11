@@ -10,6 +10,7 @@ import { StudentClassesPanel } from './StudentClassesPanel'
 import { StudentGuardiansPanel } from './StudentGuardiansPanel'
 import { StudentProfileHeader } from './StudentProfileHeader'
 import { StudentSummaryCards } from './StudentSummaryCards'
+import { StudentOfficialProfilePanel } from './StudentOfficialProfilePanel'
 
 export function StudentProfilePage() {
   const { studentId } = useParams()
@@ -80,6 +81,8 @@ export function StudentProfilePage() {
       <StudentProfileHeader student={student} />
 
       <StudentSummaryCards student={student} />
+
+      <StudentOfficialProfilePanel profile={student.profile} />
 
       <div className="grid gap-6 xl:grid-cols-2">
         <StudentGuardiansPanel guardians={student.guardians} />

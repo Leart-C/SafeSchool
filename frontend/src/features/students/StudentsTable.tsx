@@ -1,12 +1,16 @@
 import { Link } from 'react-router-dom'
 import {
   ArrowUpRight,
+  BadgeCheck,
+  CalendarDays,
   GraduationCap,
   ShieldCheck,
   Users,
 } from 'lucide-react'
+import { Badge } from '../../components/ui/Badge'
 import { Button } from '../../components/ui/Button'
 import { Card } from '../../components/ui/Card'
+import { formatDisplayDate } from '../../lib/date'
 import type { Student } from '../../services/studentService'
 
 type StudentsTableProps = {
@@ -34,7 +38,9 @@ export function StudentsTable({ students }: StudentsTableProps) {
           <thead className="bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
             <tr>
               <th className="px-5 py-3 font-semibold">Student</th>
-              <th className="px-5 py-3 font-semibold">Email</th>
+              <th className="px-5 py-3 font-semibold">Student code</th>
+              <th className="px-5 py-3 font-semibold">Grade</th>
+              <th className="px-5 py-3 font-semibold">Date of birth</th>
               <th className="px-5 py-3 font-semibold">Guardians</th>
               <th className="px-5 py-3 font-semibold">Classes</th>
               <th className="px-5 py-3 text-right font-semibold">Profile</th>
@@ -58,36 +64,52 @@ export function StudentsTable({ students }: StudentsTableProps) {
                         {student.name}
                       </p>
                       <p className="text-xs text-slate-500">
-                        {student.first_name} {student.last_name}
+                        {student.email}
                       </p>
                     </div>
                   </Link>
                 </td>
 
-                  <td className="px-5 py-4">
-                    <a
-                      className="text-slate-600 hover:text-slate-950"
-                      href={`mailto:${student.email}`}
-                    >
-                      {student.email}
-                    </a>
-                  </td>
+                <td className="px-5 py-4">
+                  {student.profile ? (
+                    <Badge variant="default">
+                      <BadgeCheck className="mr-1.5 h-3.5 w-3.5" aria-hidden={true} />
+                      {student.profile.student_code}
+                    </Badge>
+                  ) : (
+                    <Badge variant="muted">No code</Badge>
+                  )}
+                </td>
 
-                  <td className="px-5 py-4">
-                    <div className="inline-flex items-center gap-2 text-slate-600">
-                      <ShieldCheck className="h-4 w-4 text-slate-400" aria-hidden={true} />
-                      {student.guardians_count}
-                    </div>
-                  </td>
+                <td className="px-5 py-4 text-slate-600">
+                  {student.profile?.grade_level ?? 'Not set'}
+                </td>
 
-                  <td className="px-5 py-4">
-                    <div className="inline-flex items-center gap-2 text-slate-600">
-                      <Users className="h-4 w-4 text-slate-400" aria-hidden={true} />
-                      {student.classes_count}
-                    </div>
-                  </td>
+                <td className="px-5 py-4">
+                  <div className="inline-flex items-center gap-2 text-slate-600">
+                    <CalendarDays className="h-4 w-4 text-slate-400" aria-hidden={true} />
+                    {student.profile?.date_of_birth
+                      ? formatDisplayDate(student.profile.date_of_birth)
+                      : 'Not set'}
+                  </div>
+                </td>
 
-                  <td className="px-5 py-4">
+                <td className="px-5 py-4">
+                  <div className="inline-flex items-center gap-2 text-slate-600">
+                    <ShieldCheck className="h-4 w-4 text-slate-400" aria-hidden={true} />
+                    {student.guardians_count}
+                  </div>
+                </td>
+
+                <td className="px-5 py-4">
+                  <div className="inline-flex items-center gap-2 text-slate-600">
+                    <Users className="h-4 w-4 text-slate-400" aria-hidden={true} />
+                    {student.classes_count}
+                  </div>
+                </td>
+
+                <td className="px-5 py-4">
+                  <div className="flex justify-end">
                     <Button
                       as={Link}
                       icon={<ArrowUpRight className="h-4 w-4" aria-hidden={true} />}
@@ -97,9 +119,10 @@ export function StudentsTable({ students }: StudentsTableProps) {
                     >
                       View
                     </Button>
-                  </td>
-                </tr>
-              ))}
+                  </div>
+                </td>
+              </tr>
+            ))}
           </tbody>
         </table>
       </div>

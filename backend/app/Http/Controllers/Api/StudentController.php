@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Http\Requests\StoreStudentRequest;
 use App\Models\User;
+use App\Services\Students\CreateStudentService;
 use App\Services\Students\ListStudentsService;
 use App\Services\Students\ShowStudentService;
 use Illuminate\Http\JsonResponse;
@@ -24,6 +26,27 @@ class StudentController extends ApiController
         return $this->success([
             'students' => $students->forSchool($user->school_id),
         ], 'Students retrieved.');
+    }
+
+    public function store(
+        StoreStudentRequest $request,
+        CreateStudentService $students
+    ): JsonResponse {
+        $user = $request->user();
+
+        if (! $user->school_id) {
+            return $this->error(
+                'Authenticated user is not assigned to a school.',
+                status: 403,
+            );
+        }
+
+        return $this->created([
+            'student' => $students->forSchool(
+                $user->school_id,
+                $request->validated(),
+            ),
+        ], 'Student registered.');
     }
 
     public function show(

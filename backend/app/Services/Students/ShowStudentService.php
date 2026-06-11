@@ -6,6 +6,10 @@ use App\Models\User;
 
 class ShowStudentService
 {
+    public function __construct(
+        private readonly StudentProfileData $studentProfileData
+    ) {}
+
     /**
      * @return array<string, mixed>|null
      */
@@ -16,6 +20,7 @@ class ShowStudentService
         }
 
         $student->load([
+            'studentProfile',
             'guardians:id,name,email,first_name,last_name,avatar_url',
             'enrolledClasses:id,name,grade_level,section,academic_year,is_active',
         ]);
@@ -27,6 +32,7 @@ class ShowStudentService
             'last_name' => $student->last_name,
             'email' => $student->email,
             'avatar_url' => $student->avatar_url,
+            'profile' => $this->studentProfileData->fromProfile($student->studentProfile),
             'guardians' => $student->guardians->map(fn (User $guardian): array => [
                 'id' => $guardian->id,
                 'name' => $guardian->name,
