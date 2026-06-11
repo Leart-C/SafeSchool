@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Http\Requests\StoreStudentGuardianRequest;
 use App\Http\Requests\StoreStudentRequest;
 use App\Models\User;
+use App\Services\Students\CreateAndLinkGuardianService;
 use App\Services\Students\CreateStudentService;
 use App\Services\Students\ListStudentsService;
 use App\Services\Students\ShowStudentService;
@@ -75,5 +77,37 @@ class StudentController extends ApiController
         return $this->success([
             'student' => $studentData,
         ], 'Student retrieved.');
+    }
+
+    public function storeGuardian(
+        StoreStudentGuardianRequest $request,
+        User $student,
+        CreateAndLinkGuardianService $guardians
+    ): JsonResponse {
+        $user = $request->user();
+
+        if (! $user->school_id) {
+            return $this->error(
+                'Authenticated user is not assigned to a school.',
+                status: 403,
+            );
+        }
+
+        $guardian = $guardians->forSchool(
+            student: $student,
+            schoolId: $user->school_id,
+            data: $request->validated(),
+        );
+
+        if (! $guardian) {
+            return $this->error(
+                'Student was not found for this school.',
+                status: 404,
+            );
+        }
+
+        return $this->created([
+            'guardian' => $guardian,
+        ], 'Guardian linked.');
     }
 }

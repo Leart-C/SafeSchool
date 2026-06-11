@@ -137,12 +137,16 @@
 - [x] Backend student registration tests added
 - [x] Frontend student registration form added
 - [x] Frontend official student profile details added
+- [x] Backend guardian registration/linking endpoint added
+- [x] Backend guardian registration/linking tests added
+- [x] Guardian phone field added to user records
+- [x] Frontend guardian linking form added to student profile
 
 ## In Progress
-- [ ] Student registration branch verification and commit
+- [ ] Guardian registration branch frontend verification and commit
 
 ## Up Next
-- [ ] Guardian registration and student linking
+- [ ] Guardian unlink/edit relationship flow
 - [ ] Mobile Android dev-client verification
 
 ## Decisions Log
