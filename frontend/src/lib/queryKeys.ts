@@ -2,6 +2,7 @@ export const queryKeys = {
   me: ['me'] as const,
   messages: ['messages'] as const,
   classes: ['classes'] as const,
+  class: (classId: string | undefined) => ['class', classId] as const,
   students: ['students'] as const,
   users: ['users'] as const,
   student: (studentId: string | undefined) => ['student', studentId] as const,

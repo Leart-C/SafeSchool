@@ -1,10 +1,12 @@
 import {
   Archive,
+  ArrowUpRight,
   BookOpen,
   Pencil,
   RotateCcw,
   Users,
 } from 'lucide-react'
+import { Link } from 'react-router-dom'
 import { Badge } from '../../components/ui/Badge'
 import { Button } from '../../components/ui/Button'
 import { Card } from '../../components/ui/Card'
@@ -59,9 +61,12 @@ export function ClassesTable({
                     </div>
 
                     <div>
-                      <p className="font-medium text-slate-950">
+                      <Link
+                        className="font-medium text-slate-950 hover:text-emerald-700"
+                        to={`/app/classes/${schoolClass.id}`}
+                      >
                         {schoolClass.name}
-                      </p>
+                      </Link>
 
                       <p className="text-xs text-slate-500">
                         Grade {schoolClass.grade_level}
@@ -97,6 +102,16 @@ export function ClassesTable({
 
                 <td className="px-5 py-4">
                   <div className="flex justify-end gap-2">
+                    <Button
+                      as={Link}
+                      icon={<ArrowUpRight className="h-4 w-4" aria-hidden={true} />}
+                      size="sm"
+                      to={`/app/classes/${schoolClass.id}`}
+                      variant="secondary"
+                    >
+                      Open
+                    </Button>
+
                     <Button
                       icon={<Pencil className="h-4 w-4" aria-hidden={true} />}
                       onClick={() => onEdit(schoolClass)}

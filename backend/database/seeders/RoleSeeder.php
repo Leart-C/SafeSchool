@@ -19,6 +19,9 @@ class RoleSeeder extends Seeder
             'messages.create',
             'users.view',
             'users.manage',
+            'classes.view',
+            'classes.manage',
+            'class_memberships.manage',
         ];
 
         foreach ($permissions as $permission) {
@@ -37,6 +40,9 @@ class RoleSeeder extends Seeder
             'messages.create',
             'users.view',
             'users.manage',
+            'classes.view',
+            'classes.manage',
+            'class_memberships.manage',
         ]);
 
         Role::findByName(UserRole::Director->value, 'web')->syncPermissions([
@@ -47,6 +53,9 @@ class RoleSeeder extends Seeder
             'messages.create',
             'users.view',
             'users.manage',
+            'classes.view',
+            'classes.manage',
+            'class_memberships.manage',
         ]);
 
         Role::findByName(UserRole::Teacher->value, 'web')->syncPermissions([
@@ -54,6 +63,7 @@ class RoleSeeder extends Seeder
             'attendance.manage',
             'messages.view',
             'messages.create',
+            'classes.view'
         ]);
 
         Role::findByName(UserRole::Parent->value, 'web')->syncPermissions([

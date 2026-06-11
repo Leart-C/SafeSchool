@@ -13,9 +13,13 @@ Route::post('/webhooks/clerk', ClerkWebhookController::class);
 
 Route::middleware('clerk.auth')->group(function (): void {
     Route::get('/me', MeController::class);
+
     Route::get('/classes', [ClassController::class, 'index']);
+    Route::get('/classes/{class}', [ClassController::class, 'show']);
     Route::post('/classes', [ClassController::class, 'store']);
     Route::put('/classes/{class}', [ClassController::class, 'update']);
+    Route::post('/classes/{class}/members', [ClassController::class, 'storeMember']);
+    Route::delete('/classes/{class}/members/{member}', [ClassController::class, 'destroyMember']);
 
     Route::get('/students', [StudentController::class, 'index']);
     Route::get('/students/{student}', [StudentController::class, 'show']);
