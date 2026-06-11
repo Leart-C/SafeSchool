@@ -1,4 +1,9 @@
-import { apiGet } from './api'
+import {
+  apiDelete,
+  apiGet,
+  apiPost,
+  apiPut,
+} from './api'
 
 export type SchoolClass = {
   id: number
@@ -11,6 +16,20 @@ export type SchoolClass = {
   students_count: number
 }
 
+export type ClassMember = {
+  id: number
+  name: string
+  email: string
+  first_name: string | null
+  last_name: string | null
+  avatar_url: string | null
+}
+
+export type ClassProfile = SchoolClass & {
+  teachers: ClassMember[]
+  students: ClassMember[]
+}
+
 export type ClassesResponse = {
   data: {
     classes: SchoolClass[]
@@ -20,6 +39,20 @@ export type ClassesResponse = {
 
 export function getClasses(token: string): Promise<ClassesResponse> {
   return apiGet<ClassesResponse>('/classes', token)
+}
+
+export type ClassResponse = {
+  data: {
+    class: ClassProfile
+  }
+  message: string
+}
+
+export function getClass(
+  token: string,
+  classId: string,
+): Promise<ClassResponse> {
+  return apiGet<ClassResponse>(`/classes/${classId}`, token)
 }
 
 export type CreateClassPayload = {
@@ -37,34 +70,11 @@ export type CreateClassResponse = {
   message: string
 }
 
-export async function createClass(
+export function createClass(
   token: string,
   payload: CreateClassPayload,
 ): Promise<CreateClassResponse> {
-  const response = await fetch(`${import.meta.env.VITE_API_URL ?? 'http://localhost:8000/api'}/classes`, {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${token}`,
-      Accept: 'application/json',
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(payload),
-  })
-
-  if (!response.ok) {
-    let message = `API request failed with status ${response.status}`
-
-    try {
-      const body = (await response.json()) as { message?: string }
-      message = body.message ?? message
-    } catch {
-      // Keep the generic status message if the response is not JSON.
-    }
-
-    throw new Error(message)
-  }
-
-  return response.json() as Promise<CreateClassResponse>
+  return apiPost<CreateClassResponse>('/classes', token, payload)
 }
 
 export type UpdateClassPayload = {
@@ -82,33 +92,33 @@ export type UpdateClassResponse = {
   message: string
 }
 
-export async function updateClass(
+export function updateClass(
   token: string,
   classId: number,
   payload: UpdateClassPayload,
 ): Promise<UpdateClassResponse> {
-  const response = await fetch(`${import.meta.env.VITE_API_URL ?? 'http://localhost:8000/api'}/classes/${classId}`, {
-    method: 'PUT',
-    headers: {
-      Authorization: `Bearer ${token}`,
-      Accept: 'application/json',
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(payload),
-  })
+  return apiPut<UpdateClassResponse>(`/classes/${classId}`, token, payload)
+}
 
-  if (!response.ok) {
-    let message = `API request failed with status ${response.status}`
+export type ClassMemberRole = 'teacher' | 'student' | 'assistant'
 
-    try {
-      const body = (await response.json()) as { message?: string }
-      message = body.message ?? message
-    } catch {
-      // Keep the generic status message if the response is not JSON.
-    }
+export type StoreClassMemberPayload = {
+  user_id: number
+  role: ClassMemberRole
+}
 
-    throw new Error(message)
-  }
+export function storeClassMember(
+  token: string,
+  classId: number,
+  payload: StoreClassMemberPayload,
+): Promise<ClassResponse> {
+  return apiPost<ClassResponse>(`/classes/${classId}/members`, token, payload)
+}
 
-  return response.json() as Promise<UpdateClassResponse>
+export function destroyClassMember(
+  token: string,
+  classId: number,
+  userId: number,
+): Promise<ClassResponse> {
+  return apiDelete<ClassResponse>(`/classes/${classId}/members/${userId}`, token)
 }

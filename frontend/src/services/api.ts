@@ -88,3 +88,31 @@ export async function apiPut<T>(
 
   return response.json() as Promise<T>
 }
+
+export async function apiDelete<T>(
+  path: string,
+  token: string,
+): Promise<T> {
+  const response = await fetch(`${apiUrl}${path}`, {
+    method: 'DELETE',
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: 'application/json',
+    },
+  })
+
+  if (!response.ok) {
+    let message = `API request failed with status ${response.status}`
+
+    try {
+      const body = (await response.json()) as { message?: string }
+      message = body.message ?? message
+    } catch {
+      // Keep the generic status message if the response is not JSON.
+    }
+
+    throw new Error(message)
+  }
+
+  return response.json() as Promise<T>
+}

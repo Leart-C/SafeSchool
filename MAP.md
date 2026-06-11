@@ -126,12 +126,17 @@
 - [x] Frontend users management page added
 - [x] Frontend role-aware users navigation added
 - [x] Frontend user role editing added
+- [x] Class membership permissions seeded
+- [x] Backend class profile endpoint added
+- [x] Backend class member add/remove endpoints added
+- [x] Backend class profile and membership tests added
+- [x] Frontend class profile route added
+- [x] Frontend class membership management UI added
 
 ## In Progress
-- [ ] User management branch verification and commit
+- [ ] Class membership branch verification and commit
 
 ## Up Next
-- [ ] Class membership management
 - [ ] Mobile Android dev-client verification
 
 ## Decisions Log
