@@ -1,5 +1,5 @@
 import { UserButton } from '@clerk/clerk-react'
-import type { ReactNode } from 'react'
+import type { ComponentType, ReactNode } from 'react'
 import { NavLink } from 'react-router-dom'
 import {
   Bell,
@@ -26,7 +26,17 @@ type AppShellProps = {
   children: ReactNode
 }
 
-const navigationItems = [
+type NavigationItem = {
+  label: string
+  to: string
+  icon: ComponentType<{
+    className?: string
+    'aria-hidden'?: boolean
+  }>
+  allowedRoles?: string[]
+}
+
+const navigationItems: NavigationItem[] = [
   {
     label: 'Dashboard',
     to: '/app/dashboard',
@@ -52,10 +62,24 @@ const navigationItems = [
     to: '/app/messages',
     icon: MessageSquareText,
   },
+  {
+    label: 'Users',
+    to: '/app/users',
+    icon: Users,
+    allowedRoles: ['admin', 'director'],
+  },
 ]
 
 export function AppShell({ user, children }: AppShellProps) {
   const primaryRole = user.roles[0] ?? 'No role'
+
+  const visibleNavigationItems = navigationItems.filter((item) => {
+    if (!item.allowedRoles) {
+      return true
+    }
+
+    return user.roles.some((role) => item.allowedRoles?.includes(role))
+  })
 
   return (
     <div className="min-h-screen bg-slate-100 text-slate-950 lg:grid lg:grid-cols-[280px_1fr]">
@@ -64,7 +88,7 @@ export function AppShell({ user, children }: AppShellProps) {
           <div className="border-b border-slate-100 px-5 py-5">
             <div className="flex items-center gap-3">
               <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-slate-950 text-white shadow-sm">
-                <School className="h-5 w-5" aria-hidden="true" />
+                <School className="h-5 w-5" aria-hidden={true} />
               </div>
 
               <div className="min-w-0">
@@ -82,7 +106,7 @@ export function AppShell({ user, children }: AppShellProps) {
             aria-label="Main navigation"
             className="flex gap-1 overflow-x-auto px-4 py-4 lg:flex-col lg:overflow-visible"
           >
-            {navigationItems.map((item) => {
+            {visibleNavigationItems.map((item) => {
               const Icon = item.icon
 
               return (
@@ -99,7 +123,7 @@ export function AppShell({ user, children }: AppShellProps) {
                   key={item.to}
                   to={item.to}
                 >
-                  <Icon className="h-4 w-4 shrink-0" aria-hidden="true" />
+                  <Icon className="h-4 w-4 shrink-0" aria-hidden={true} />
                   <span>{item.label}</span>
                 </NavLink>
               )
@@ -109,7 +133,7 @@ export function AppShell({ user, children }: AppShellProps) {
           <div className="mt-auto hidden border-t border-slate-100 px-5 py-5 lg:block">
             <div className="rounded-lg bg-slate-50 p-4">
               <div className="flex items-center gap-2 text-xs font-medium uppercase tracking-wide text-slate-500">
-                <Users className="h-3.5 w-3.5" aria-hidden="true" />
+                <Users className="h-3.5 w-3.5" aria-hidden={true} />
                 Workspace
               </div>
 
@@ -148,7 +172,7 @@ export function AppShell({ user, children }: AppShellProps) {
                 className="hidden h-9 w-9 items-center justify-center rounded-md border border-slate-200 bg-white text-slate-500 transition hover:bg-slate-50 hover:text-slate-950 sm:inline-flex"
                 type="button"
               >
-                <Bell className="h-4 w-4" aria-hidden="true" />
+                <Bell className="h-4 w-4" aria-hidden={true} />
               </button>
 
               <div className="hidden items-center gap-2 md:flex">

@@ -3,7 +3,6 @@
 namespace Tests\Feature;
 
 use App\Enums\MessageAudience;
-use App\Models\Message;
 use App\Models\School;
 use App\Models\SchoolClass;
 use App\Models\User;

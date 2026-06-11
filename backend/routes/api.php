@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\ClerkWebhookController;
 use App\Http\Controllers\Api\MeController;
 use App\Http\Controllers\Api\MessageController;
 use App\Http\Controllers\Api\StudentController;
+use App\Http\Controllers\Api\UserController;
 use Illuminate\Support\Facades\Route;
 
 Route::post('/webhooks/clerk', ClerkWebhookController::class);
@@ -27,4 +28,7 @@ Route::middleware('clerk.auth')->group(function (): void {
     Route::post('/messages', [MessageController::class, 'store']);
     Route::put('/messages/{message}', [MessageController::class, 'update']);
     Route::post('/messages/{message}/archive', [MessageController::class, 'archive']);
+
+    Route::get('/users', [UserController::class, 'index']);
+    Route::put('/users/{user}/roles', [UserController::class, 'updateRoles']);
 });
