@@ -119,11 +119,19 @@
 - [x] Frontend students list and profile UI refreshed
 - [x] Frontend attendance UI refreshed
 - [x] Frontend messages UI refreshed
+- [x] Backend user management permissions seeded
+- [x] Backend users index endpoint added
+- [x] Backend user role update endpoint added
+- [x] Backend user management tests added
+- [x] Frontend users management page added
+- [x] Frontend role-aware users navigation added
+- [x] Frontend user role editing added
 
 ## In Progress
-- [ ] Frontend UI refresh branch verification and commit
+- [ ] User management branch verification and commit
 
 ## Up Next
+- [ ] Class membership management
 - [ ] Mobile Android dev-client verification
 
 ## Decisions Log

@@ -15,6 +15,7 @@ import { MessagesPage } from '../features/messages/MessagesPage'
 import { StudentsPage } from '../features/students/StudentsPage'
 import { StudentProfilePage } from '../features/students/StudentProfilePage'
 import { AuthenticatedLayout } from '../layouts/AuthenticatedLayout'
+import { UsersPage } from '../features/users/UsersPage'
 
 export function AppRouter() {
   return (
@@ -49,6 +50,7 @@ export function AppRouter() {
         <Route path="students/:studentId" element={<StudentProfilePage />} />
         <Route path="attendance" element={<AttendancePage />} />
         <Route path="messages" element={<MessagesPage />} />
+        <Route path="users" element={<UsersPage />} />
       </Route>
 
       <Route path="*" element={<Navigate replace to="/" />} />
