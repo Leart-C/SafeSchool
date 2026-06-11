@@ -30,6 +30,7 @@ class User extends Authenticatable
         'email',
         'avatar_url',
         'school_id',
+        'phone',
     ];
 
     /**

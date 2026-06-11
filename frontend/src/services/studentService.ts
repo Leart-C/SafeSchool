@@ -1,5 +1,14 @@
 import { apiGet, apiPost } from './api'
 
+export type StudentOfficialProfile = {
+  id: number
+  student_code: string
+  date_of_birth: string | null
+  grade_level: string | null
+  enrollment_status: string
+  notes: string | null
+}
+
 export type Student = {
   id: number
   name: string
@@ -33,6 +42,7 @@ export type StudentGuardian = {
   relationship: string | null
   is_primary: boolean
   emergency_contact_priority: number | null
+  phone: string | null
 }
 
 export type StudentClass = {
@@ -63,15 +73,6 @@ export function getStudent(
   return apiGet<StudentResponse>(`/students/${studentId}`, token)
 }
 
-export type StudentOfficialProfile = {
-  id: number
-  student_code: string
-  date_of_birth: string | null
-  grade_level: string | null
-  enrollment_status: string
-  notes: string | null
-}
-
 export type CreateStudentPayload = {
   first_name: string
   last_name: string
@@ -95,4 +96,33 @@ export function createStudent(
   payload: CreateStudentPayload,
 ): Promise<CreateStudentResponse> {
   return apiPost<CreateStudentResponse>('/students', token, payload)
+}
+
+export type CreateStudentGuardianPayload = {
+  first_name: string
+  last_name: string
+  email: string
+  relationship: string
+  is_primary?: boolean
+  emergency_contact_priority?: number | null
+  phone?: string
+}
+
+export type CreateStudentGuardianResponse = {
+  data: {
+    guardian: StudentGuardian
+  }
+  message: string
+}
+
+export function createStudentGuardian(
+  token: string,
+  studentId: string,
+  payload: CreateStudentGuardianPayload,
+): Promise<CreateStudentGuardianResponse> {
+  return apiPost<CreateStudentGuardianResponse>(
+    `/students/${studentId}/guardians`,
+    token,
+    payload,
+  )
 }

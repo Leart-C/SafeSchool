@@ -21,7 +21,7 @@ class ShowStudentService
 
         $student->load([
             'studentProfile',
-            'guardians:id,name,email,first_name,last_name,avatar_url',
+            'guardians:id,name,email,phone,first_name,last_name,avatar_url',
             'enrolledClasses:id,name,grade_level,section,academic_year,is_active',
         ]);
 
@@ -43,6 +43,7 @@ class ShowStudentService
                 'relationship' => $guardian->pivot->relationship,
                 'is_primary' => $guardian->pivot->is_primary,
                 'emergency_contact_priority' => $guardian->pivot->emergency_contact_priority,
+                'phone' => $guardian->phone,
             ])->values(),
             'classes' => $student->enrolledClasses->map(fn ($class): array => [
                 'id' => $class->id,

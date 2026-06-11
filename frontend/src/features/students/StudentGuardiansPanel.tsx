@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react'
 import {
   PhoneCall,
   ShieldCheck,
@@ -8,23 +9,31 @@ import { Card } from '../../components/ui/Card'
 import type { StudentGuardian } from '../../services/studentService'
 
 type StudentGuardiansPanelProps = {
+  action?: ReactNode
   guardians: StudentGuardian[]
 }
 
-export function StudentGuardiansPanel({ guardians }: StudentGuardiansPanelProps) {
+export function StudentGuardiansPanel({
+  action,
+  guardians,
+}: StudentGuardiansPanelProps) {
   return (
     <Card className="h-full">
-      <div className="mb-5">
-        <div className="flex items-center gap-2">
-          <ShieldCheck className="h-4 w-4 text-slate-500" aria-hidden={true} />
-          <h3 className="text-lg font-semibold text-slate-950">
-            Guardians
-          </h3>
+      <div className="mb-5 flex items-start justify-between gap-4">
+        <div>
+          <div className="flex items-center gap-2">
+            <ShieldCheck className="h-4 w-4 text-slate-500" aria-hidden={true} />
+            <h3 className="text-lg font-semibold text-slate-950">
+              Guardians
+            </h3>
+          </div>
+
+          <p className="mt-1 text-sm text-slate-600">
+            Family contacts linked to this student.
+          </p>
         </div>
 
-        <p className="mt-1 text-sm text-slate-600">
-          Family contacts linked to this student.
-        </p>
+        {action}
       </div>
 
       {guardians.length === 0 ? (
@@ -33,7 +42,7 @@ export function StudentGuardiansPanel({ guardians }: StudentGuardiansPanelProps)
             No guardians linked yet.
           </p>
           <p className="mt-1 text-sm text-slate-500">
-            Guardian links will appear here when they are added by the school.
+            Add a guardian so parents can be connected to attendance updates and school communication.
           </p>
         </div>
       ) : (
@@ -61,6 +70,15 @@ export function StudentGuardiansPanel({ guardians }: StudentGuardiansPanelProps)
                     </a>
                   </div>
                 </div>
+
+                {guardian.phone ? (
+                  <a
+                    className="mt-1 block text-sm text-slate-600 hover:text-slate-950"
+                    href={`tel:${guardian.phone}`}
+                  >
+                    {guardian.phone}
+                  </a>
+                ) : null}
 
                 {guardian.is_primary ? (
                   <Badge variant="success">Primary</Badge>
