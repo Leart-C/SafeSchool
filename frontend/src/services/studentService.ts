@@ -1,4 +1,4 @@
-import { apiGet, apiPost } from './api'
+import { apiDelete, apiGet, apiPost, apiPut } from './api'
 
 export type StudentOfficialProfile = {
   id: number
@@ -36,13 +36,13 @@ export type StudentGuardian = {
   id: number
   name: string
   email: string
+  phone: string | null
   first_name: string | null
   last_name: string | null
   avatar_url: string | null
   relationship: string | null
   is_primary: boolean
   emergency_contact_priority: number | null
-  phone: string | null
 }
 
 export type StudentClass = {
@@ -98,17 +98,20 @@ export function createStudent(
   return apiPost<CreateStudentResponse>('/students', token, payload)
 }
 
-export type CreateStudentGuardianPayload = {
+export type StudentGuardianPayload = {
   first_name: string
   last_name: string
   email: string
+  phone?: string
   relationship: string
   is_primary?: boolean
   emergency_contact_priority?: number | null
-  phone?: string
 }
 
-export type CreateStudentGuardianResponse = {
+export type CreateStudentGuardianPayload = StudentGuardianPayload
+export type UpdateStudentGuardianPayload = StudentGuardianPayload
+
+export type StudentGuardianResponse = {
   data: {
     guardian: StudentGuardian
   }
@@ -119,10 +122,39 @@ export function createStudentGuardian(
   token: string,
   studentId: string,
   payload: CreateStudentGuardianPayload,
-): Promise<CreateStudentGuardianResponse> {
-  return apiPost<CreateStudentGuardianResponse>(
+): Promise<StudentGuardianResponse> {
+  return apiPost<StudentGuardianResponse>(
     `/students/${studentId}/guardians`,
     token,
     payload,
+  )
+}
+
+export function updateStudentGuardian(
+  token: string,
+  studentId: string,
+  guardianId: number,
+  payload: UpdateStudentGuardianPayload,
+): Promise<StudentGuardianResponse> {
+  return apiPut<StudentGuardianResponse>(
+    `/students/${studentId}/guardians/${guardianId}`,
+    token,
+    payload,
+  )
+}
+
+export type DeleteStudentGuardianResponse = {
+  data: Record<string, never>
+  message: string
+}
+
+export function deleteStudentGuardian(
+  token: string,
+  studentId: string,
+  guardianId: number,
+): Promise<DeleteStudentGuardianResponse> {
+  return apiDelete<DeleteStudentGuardianResponse>(
+    `/students/${studentId}/guardians/${guardianId}`,
+    token,
   )
 }

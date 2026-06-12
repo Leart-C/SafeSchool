@@ -141,12 +141,16 @@
 - [x] Backend guardian registration/linking tests added
 - [x] Guardian phone field added to user records
 - [x] Frontend guardian linking form added to student profile
+- [x] Backend guardian edit/unlink endpoints added
+- [x] Backend guardian lifecycle tests added
+- [x] Frontend guardian edit/unlink actions added
 
 ## In Progress
-- [ ] Guardian registration branch frontend verification and commit
+- [ ] Guardian edit/unlink branch verification and commit
 
 ## Up Next
-- [ ] Guardian unlink/edit relationship flow
+- [ ] Guardian search/reuse picker
+- [ ] Parent-facing child dashboard
 - [ ] Mobile Android dev-client verification
 
 ## Decisions Log

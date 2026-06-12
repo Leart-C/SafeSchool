@@ -1,21 +1,30 @@
 import type { ReactNode } from 'react'
 import {
+  Pencil,
   PhoneCall,
   ShieldCheck,
+  Trash2,
   UserRound,
 } from 'lucide-react'
 import { Badge } from '../../components/ui/Badge'
+import { Button } from '../../components/ui/Button'
 import { Card } from '../../components/ui/Card'
 import type { StudentGuardian } from '../../services/studentService'
 
 type StudentGuardiansPanelProps = {
   action?: ReactNode
   guardians: StudentGuardian[]
+  isMutatingGuardianId?: number | null
+  onEdit?: (guardian: StudentGuardian) => void
+  onUnlink?: (guardian: StudentGuardian) => void
 }
 
 export function StudentGuardiansPanel({
   action,
   guardians,
+  isMutatingGuardianId = null,
+  onEdit,
+  onUnlink,
 }: StudentGuardiansPanelProps) {
   return (
     <Card className="h-full">
@@ -52,37 +61,68 @@ export function StudentGuardiansPanel({
               className="rounded-lg border border-slate-200 bg-white p-4 transition hover:bg-slate-50"
               key={guardian.id}
             >
-              <div className="flex items-start justify-between gap-3">
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                 <div className="flex items-start gap-3">
                   <div className="flex h-10 w-10 items-center justify-center rounded-md bg-slate-100 text-slate-600">
                     <UserRound className="h-4 w-4" aria-hidden={true} />
                   </div>
 
                   <div>
-                    <p className="font-medium text-slate-950">
-                      {guardian.name}
-                    </p>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <p className="font-medium text-slate-950">
+                        {guardian.name}
+                      </p>
+
+                      {guardian.is_primary ? (
+                        <Badge variant="success">Primary</Badge>
+                      ) : null}
+                    </div>
+
                     <a
                       className="mt-1 block text-sm text-slate-600 hover:text-slate-950"
                       href={`mailto:${guardian.email}`}
                     >
                       {guardian.email}
                     </a>
+
+                    {guardian.phone ? (
+                      <a
+                        className="mt-1 block text-sm text-slate-600 hover:text-slate-950"
+                        href={`tel:${guardian.phone}`}
+                      >
+                        {guardian.phone}
+                      </a>
+                    ) : null}
                   </div>
                 </div>
 
-                {guardian.phone ? (
-                  <a
-                    className="mt-1 block text-sm text-slate-600 hover:text-slate-950"
-                    href={`tel:${guardian.phone}`}
-                  >
-                    {guardian.phone}
-                  </a>
-                ) : null}
+                <div className="flex gap-2">
+                  {onEdit ? (
+                    <Button
+                      disabled={isMutatingGuardianId === guardian.id}
+                      onClick={() => onEdit(guardian)}
+                      size="sm"
+                      type="button"
+                      variant="secondary"
+                    >
+                      <Pencil className="h-4 w-4" aria-hidden={true} />
+                      Edit
+                    </Button>
+                  ) : null}
 
-                {guardian.is_primary ? (
-                  <Badge variant="success">Primary</Badge>
-                ) : null}
+                  {onUnlink ? (
+                    <Button
+                      disabled={isMutatingGuardianId === guardian.id}
+                      onClick={() => onUnlink(guardian)}
+                      size="sm"
+                      type="button"
+                      variant="danger"
+                    >
+                      <Trash2 className="h-4 w-4" aria-hidden={true} />
+                      Unlink
+                    </Button>
+                  ) : null}
+                </div>
               </div>
 
               <div className="mt-4 grid gap-3 text-sm text-slate-600 sm:grid-cols-2">

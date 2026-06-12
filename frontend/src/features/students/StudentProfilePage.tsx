@@ -10,8 +10,11 @@ import { queryKeys } from '../../lib/queryKeys'
 import { appToast } from '../../lib/toast'
 import {
   createStudentGuardian,
+  deleteStudentGuardian,
   getStudent,
-  type CreateStudentGuardianPayload,
+  updateStudentGuardian,
+  type StudentGuardian,
+  type StudentGuardianPayload,
 } from '../../services/studentService'
 import { StudentClassesPanel } from './StudentClassesPanel'
 import { StudentGuardianForm } from './StudentGuardianForm'
@@ -20,13 +23,26 @@ import { StudentOfficialProfilePanel } from './StudentOfficialProfilePanel'
 import { StudentProfileHeader } from './StudentProfileHeader'
 import { StudentSummaryCards } from './StudentSummaryCards'
 
-const initialGuardianForm: CreateStudentGuardianPayload = {
+const initialGuardianForm: StudentGuardianPayload = {
   first_name: '',
   last_name: '',
   email: '',
+  phone: '',
   relationship: 'mother',
   is_primary: false,
   emergency_contact_priority: null,
+}
+
+function formFromGuardian(guardian: StudentGuardian): StudentGuardianPayload {
+  return {
+    first_name: guardian.first_name ?? '',
+    last_name: guardian.last_name ?? '',
+    email: guardian.email,
+    phone: guardian.phone ?? '',
+    relationship: guardian.relationship ?? 'guardian',
+    is_primary: guardian.is_primary,
+    emergency_contact_priority: guardian.emergency_contact_priority,
+  }
 }
 
 export function StudentProfilePage() {
@@ -34,7 +50,23 @@ export function StudentProfilePage() {
   const { getToken, isLoaded, isSignedIn } = useAuth()
   const queryClient = useQueryClient()
   const [isGuardianFormOpen, setIsGuardianFormOpen] = useState(false)
+  const [editingGuardian, setEditingGuardian] = useState<StudentGuardian | null>(null)
   const [guardianForm, setGuardianForm] = useState(initialGuardianForm)
+  const [mutatingGuardianId, setMutatingGuardianId] = useState<number | null>(null)
+
+  const resetGuardianForm = () => {
+    setGuardianForm(initialGuardianForm)
+    setEditingGuardian(null)
+    setIsGuardianFormOpen(false)
+  }
+
+  const invalidateStudentData = async () => {
+    await Promise.all([
+      queryClient.invalidateQueries({ queryKey: queryKeys.student(studentId) }),
+      queryClient.invalidateQueries({ queryKey: queryKeys.students }),
+      queryClient.invalidateQueries({ queryKey: queryKeys.users }),
+    ])
+  }
 
   const studentQuery = useQuery({
     queryKey: queryKeys.student(studentId),
@@ -55,7 +87,7 @@ export function StudentProfilePage() {
   })
 
   const createGuardianMutation = useMutation({
-    mutationFn: async (payload: CreateStudentGuardianPayload) => {
+    mutationFn: async (payload: StudentGuardianPayload) => {
       if (!studentId) {
         throw new Error('Student id is missing.')
       }
@@ -73,15 +105,9 @@ export function StudentProfilePage() {
       })
     },
     onSuccess: async () => {
-      await Promise.all([
-        queryClient.invalidateQueries({ queryKey: queryKeys.student(studentId) }),
-        queryClient.invalidateQueries({ queryKey: queryKeys.students }),
-        queryClient.invalidateQueries({ queryKey: queryKeys.users }),
-      ])
-
+      await invalidateStudentData()
       appToast.success('Guardian linked.')
-      setGuardianForm(initialGuardianForm)
-      setIsGuardianFormOpen(false)
+      resetGuardianForm()
     },
     onError: (error) => {
       appToast.error(
@@ -89,6 +115,76 @@ export function StudentProfilePage() {
           ? error.message
           : 'Failed to link guardian.',
       )
+    },
+  })
+
+  const updateGuardianMutation = useMutation({
+    mutationFn: async (payload: StudentGuardianPayload) => {
+      if (!studentId || !editingGuardian) {
+        throw new Error('Guardian edit context is missing.')
+      }
+
+      const token = await getToken()
+
+      if (!token) {
+        throw new Error('No Clerk session token was returned.')
+      }
+
+      setMutatingGuardianId(editingGuardian.id)
+
+      return updateStudentGuardian(token, studentId, editingGuardian.id, {
+        ...payload,
+        emergency_contact_priority:
+          payload.emergency_contact_priority || null,
+      })
+    },
+    onSuccess: async () => {
+      await invalidateStudentData()
+      appToast.success('Guardian updated.')
+      resetGuardianForm()
+    },
+    onError: (error) => {
+      appToast.error(
+        error instanceof Error
+          ? error.message
+          : 'Failed to update guardian.',
+      )
+    },
+    onSettled: () => {
+      setMutatingGuardianId(null)
+    },
+  })
+
+  const deleteGuardianMutation = useMutation({
+    mutationFn: async (guardian: StudentGuardian) => {
+      if (!studentId) {
+        throw new Error('Student id is missing.')
+      }
+
+      const token = await getToken()
+
+      if (!token) {
+        throw new Error('No Clerk session token was returned.')
+      }
+
+      setMutatingGuardianId(guardian.id)
+
+      return deleteStudentGuardian(token, studentId, guardian.id)
+    },
+    onSuccess: async () => {
+      await invalidateStudentData()
+      appToast.success('Guardian unlinked.')
+      resetGuardianForm()
+    },
+    onError: (error) => {
+      appToast.error(
+        error instanceof Error
+          ? error.message
+          : 'Failed to unlink guardian.',
+      )
+    },
+    onSettled: () => {
+      setMutatingGuardianId(null)
     },
   })
 
@@ -134,6 +230,9 @@ export function StudentProfilePage() {
     )
   }
 
+  const isSubmitting =
+    createGuardianMutation.isPending || updateGuardianMutation.isPending
+
   return (
     <section className="space-y-6">
       <StudentProfileHeader student={student} />
@@ -144,14 +243,26 @@ export function StudentProfilePage() {
 
       {isGuardianFormOpen ? (
         <StudentGuardianForm
+          description={
+            editingGuardian
+              ? 'Update this guardian contact and relationship details.'
+              : 'Create or reuse a parent account and link it to this student.'
+          }
           form={guardianForm}
-          isSubmitting={createGuardianMutation.isPending}
-          onCancel={() => {
-            setGuardianForm(initialGuardianForm)
-            setIsGuardianFormOpen(false)
-          }}
+          isSubmitting={isSubmitting}
+          onCancel={resetGuardianForm}
           onChange={setGuardianForm}
-          onSubmit={() => createGuardianMutation.mutate(guardianForm)}
+          onSubmit={() => {
+            if (editingGuardian) {
+              updateGuardianMutation.mutate(guardianForm)
+              return
+            }
+
+            createGuardianMutation.mutate(guardianForm)
+          }}
+          submitLabel={editingGuardian ? 'Save guardian' : 'Link guardian'}
+          submittingLabel={editingGuardian ? 'Saving...' : 'Linking...'}
+          title={editingGuardian ? 'Edit guardian' : 'Link guardian'}
         />
       ) : null}
 
@@ -159,16 +270,38 @@ export function StudentProfilePage() {
         <StudentGuardiansPanel
           action={
             <Button
-              onClick={() => setIsGuardianFormOpen((isOpen) => !isOpen)}
+              onClick={() => {
+                if (isGuardianFormOpen && !editingGuardian) {
+                  resetGuardianForm()
+                  return
+                }
+
+                setEditingGuardian(null)
+                setGuardianForm(initialGuardianForm)
+                setIsGuardianFormOpen(true)
+              }}
               size="sm"
               type="button"
               variant="secondary"
             >
               <Plus className="h-4 w-4" aria-hidden={true} />
-              {isGuardianFormOpen ? 'Close' : 'Add guardian'}
+              {isGuardianFormOpen && !editingGuardian ? 'Close' : 'Add guardian'}
             </Button>
           }
           guardians={student.guardians}
+          isMutatingGuardianId={mutatingGuardianId}
+          onEdit={(guardian) => {
+            setEditingGuardian(guardian)
+            setGuardianForm(formFromGuardian(guardian))
+            setIsGuardianFormOpen(true)
+          }}
+          onUnlink={(guardian) => {
+            if (!window.confirm(`Unlink ${guardian.name} from this student?`)) {
+              return
+            }
+
+            deleteGuardianMutation.mutate(guardian)
+          }}
         />
         <StudentClassesPanel classes={student.classes} />
       </div>
