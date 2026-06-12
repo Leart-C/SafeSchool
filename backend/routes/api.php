@@ -25,6 +25,8 @@ Route::middleware('clerk.auth')->group(function (): void {
     Route::post('/students', [StudentController::class, 'store']);
     Route::get('/students/{student}', [StudentController::class, 'show']);
     Route::post('/students/{student}/guardians', [StudentController::class, 'storeGuardian']);
+    Route::put('/students/{student}/guardians/{guardian}', [StudentController::class, 'updateGuardian']);
+    Route::delete('/students/{student}/guardians/{guardian}', [StudentController::class, 'destroyGuardian']);
 
     Route::get('/attendance', [AttendanceController::class, 'index']);
     Route::get('/classes/{class}/attendance-roster', [AttendanceController::class, 'roster']);

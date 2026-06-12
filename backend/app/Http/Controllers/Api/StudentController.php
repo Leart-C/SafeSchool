@@ -4,11 +4,14 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Requests\StoreStudentGuardianRequest;
 use App\Http\Requests\StoreStudentRequest;
+use App\Http\Requests\UpdateStudentGuardianRequest;
 use App\Models\User;
 use App\Services\Students\CreateAndLinkGuardianService;
 use App\Services\Students\CreateStudentService;
+use App\Services\Students\DestroyStudentGuardianService;
 use App\Services\Students\ListStudentsService;
 use App\Services\Students\ShowStudentService;
+use App\Services\Students\UpdateStudentGuardianService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -109,5 +112,70 @@ class StudentController extends ApiController
         return $this->created([
             'guardian' => $guardian,
         ], 'Guardian linked.');
+    }
+
+    public function updateGuardian(
+        UpdateStudentGuardianRequest $request,
+        User $student,
+        User $guardian,
+        UpdateStudentGuardianService $guardians
+    ): JsonResponse {
+        $user = $request->user();
+
+        if (! $user->school_id) {
+            return $this->error(
+                'Authenticated user is not assigned to a school.',
+                status: 403,
+            );
+        }
+
+        $guardianData = $guardians->forSchool(
+            student: $student,
+            guardian: $guardian,
+            schoolId: $user->school_id,
+            data: $request->validated(),
+        );
+
+        if (! $guardianData) {
+            return $this->error(
+                'Guardian link was not found for this school.',
+                status: 404,
+            );
+        }
+
+        return $this->success([
+            'guardian' => $guardianData,
+        ], 'Guardian updated.');
+    }
+
+    public function destroyGuardian(
+        Request $request,
+        User $student,
+        User $guardian,
+        DestroyStudentGuardianService $guardians
+    ): JsonResponse {
+        $user = $request->user();
+
+        if (! $user->school_id) {
+            return $this->error(
+                'Authenticated user is not assigned to a school.',
+                status: 403,
+            );
+        }
+
+        $deleted = $guardians->forSchool(
+            student: $student,
+            guardian: $guardian,
+            schoolId: $user->school_id,
+        );
+
+        if (! $deleted) {
+            return $this->error(
+                'Guardian link was not found for this school.',
+                status: 404,
+            );
+        }
+
+        return $this->success([], 'Guardian unlinked.');
     }
 }

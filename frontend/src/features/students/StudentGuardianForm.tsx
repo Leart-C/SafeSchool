@@ -3,14 +3,18 @@ import { Button } from '../../components/ui/Button'
 import { Card } from '../../components/ui/Card'
 import { Input } from '../../components/ui/Input'
 import { Select } from '../../components/ui/Select'
-import type { CreateStudentGuardianPayload } from '../../services/studentService'
+import type { StudentGuardianPayload } from '../../services/studentService'
 
 type StudentGuardianFormProps = {
-  form: CreateStudentGuardianPayload
+  description?: string
+  form: StudentGuardianPayload
   isSubmitting: boolean
   onCancel: () => void
-  onChange: (form: CreateStudentGuardianPayload) => void
+  onChange: (form: StudentGuardianPayload) => void
   onSubmit: () => void
+  submitLabel?: string
+  submittingLabel?: string
+  title?: string
 }
 
 const relationships = [
@@ -24,11 +28,15 @@ const relationships = [
 ]
 
 export function StudentGuardianForm({
+  description = 'Create or reuse a parent account and link it to this student.',
   form,
   isSubmitting,
   onCancel,
   onChange,
   onSubmit,
+  submitLabel = 'Link guardian',
+  submittingLabel = 'Linking...',
+  title = 'Link guardian',
 }: StudentGuardianFormProps) {
   const handleSubmit: FormEventHandler<HTMLFormElement> = (event) => {
     event.preventDefault()
@@ -40,10 +48,10 @@ export function StudentGuardianForm({
       <form className="space-y-5" onSubmit={handleSubmit}>
         <div>
           <h3 className="text-lg font-semibold text-slate-950">
-            Link guardian
+            {title}
           </h3>
           <p className="mt-1 text-sm text-slate-600">
-            Create or reuse a parent account and link it to this student.
+            {description}
           </p>
         </div>
 
@@ -54,7 +62,7 @@ export function StudentGuardianForm({
               onChange={(event) =>
                 onChange({ ...form, first_name: event.target.value })
               }
-              placeholder="Mira"
+              placeholder="Filan"
               required
               value={form.first_name}
             />
@@ -66,7 +74,7 @@ export function StudentGuardianForm({
               onChange={(event) =>
                 onChange({ ...form, last_name: event.target.value })
               }
-              placeholder="Lovelace"
+              placeholder="Fisteku"
               required
               value={form.last_name}
             />
@@ -88,12 +96,12 @@ export function StudentGuardianForm({
           <label className="space-y-2">
             <span className="text-sm font-medium text-slate-700">Phone</span>
             <Input
-                onChange={(event) =>
+              onChange={(event) =>
                 onChange({ ...form, phone: event.target.value })
-                }
-                placeholder="+355 69 000 0000"
-                type="tel"
-                value={form.phone ?? ''}
+              }
+              placeholder="+355 69 000 0000"
+              type="tel"
+              value={form.phone ?? ''}
             />
           </label>
 
@@ -150,7 +158,7 @@ export function StudentGuardianForm({
 
         <div className="flex flex-wrap gap-3">
           <Button disabled={isSubmitting} type="submit">
-            {isSubmitting ? 'Linking...' : 'Link guardian'}
+            {isSubmitting ? submittingLabel : submitLabel}
           </Button>
 
           <Button
